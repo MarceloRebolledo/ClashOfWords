@@ -1,0 +1,591 @@
+interface StudentHubProps {
+  onNavigate: (s: Screen) => void;
+  profile: StudentProfile;
+  setProfile: React.Dispatch<React.SetStateAction<StudentProfile>>;
+  codes: RewardCode[];
+  setCodes: React.Dispatch<React.SetStateAction<RewardCode[]>>;
+  catalog: Card[];
+  history: MatchLog[];
+  onZoomCard: (c: Card) => void;
+}
+
+function StudentHubScreen({ onNavigate, profile, setProfile, codes, setCodes, catalog, history, onZoomCard }: StudentHubProps) {
+  const [showRedeem, setShowRedeem] = useState(false);
+  const [showShop, setShowShop] = useState(false);
+  const [showCollection, setShowCollection] = useState(false);
+  const [showProgress, setShowProgress] = useState(false);
+  const [showRules, setShowRules] = useState(false);
+  
+  const [redeemCode, setRedeemCode] = useState("");
+  const [redeemStatus, setRedeemStatus] = useState<{ success: boolean; msg: string } | null>(null);
+
+  // Shop state variables
+  const [boughtPack, setBoughtPack] = useState<Card[] | null>(null);
+  const [isOpeningPack, setIsOpeningPack] = useState(false);
+
+  const [claimedLoot, setClaimedLoot] = useState<Card[] | null>(null);
+
+  const claimStarterLoot = () => {
+    const activeCards = catalog.filter(c => c.active !== false);
+    
+    // Helper to get a random rarity based on probabilities
+    const getRandomRarity = (): Rarity => {
+      const rand = Math.random() * 100;
+      if (rand < 55) return "Common";      // 55%
+      if (rand < 80) return "Uncommon";    // 25%
+      if (rand < 92) return "Rare";        // 12%
+      if (rand < 98) return "Epic";        // 6%
+      return "Legendary";                  // 2%
+    };
+
+    const drawCard = (type: CardType): Card => {
+      const rarity = getRandomRarity();
+      let matches = activeCards.filter(c => c.type === type && c.rarity === rarity);
+      if (matches.length === 0) {
+        matches = activeCards.filter(c => c.type === type); // fallback
+      }
+      if (matches.length === 0) {
+        matches = activeCards; // ultimate fallback
+      }
+      return matches[Math.floor(Math.random() * matches.length)];
+    };
+
+    const drawn: Card[] = [];
+    // Draw 12 creatures, 5 items, 5 effects
+    for (let i = 0; i < 12; i++) {
+      drawn.push(drawCard("Creature"));
+    }
+    for (let i = 0; i < 5; i++) {
+      drawn.push(drawCard("Item"));
+    }
+    for (let i = 0; i < 5; i++) {
+      drawn.push(drawCard("Effect"));
+    }
+
+    setProfile(prev => ({
+      ...prev,
+      coins: prev.coins + 100,
+      collection: drawn.map(c => c.id),
+      activeDeck: drawn.slice(0, 20).map(c => c.id) // Automatically activate first 20 cards
+    }));
+
+    setClaimedLoot(drawn);
+    playSynthSound("equip");
+  };
+
+  const buyPack = () => {
+    if (profile.coins < 50) return;
+    setProfile(prev => ({ ...prev, coins: prev.coins - 50 }));
+    setIsOpeningPack(true);
+    setTimeout(() => {
+      const activeCards = catalog.filter(c => c.active !== false);
+      const drawn: Card[] = [];
+      for (let i = 0; i < 3; i++) {
+        const rand = activeCards[Math.floor(Math.random() * activeCards.length)] || defaultCatalog[0];
+        drawn.push(rand);
+      }
+      setProfile(prev => ({
+        ...prev,
+        collection: [...prev.collection, ...drawn.map(c => c.id)]
+      }));
+      setBoughtPack(drawn);
+      setIsOpeningPack(false);
+      playSynthSound("equip");
+    }, 1500);
+  };
+
+  const handleRedeem = () => {
+    const cleaned = redeemCode.trim().toUpperCase();
+    if (!cleaned) return;
+    const matched = codes.find(c => c.code.toUpperCase() === cleaned);
+    if (!matched) {
+      setRedeemStatus({ success: false, msg: "Código inválido." });
+      playSynthSound("error");
+      return;
+    }
+    if (matched.redeemed) {
+      setRedeemStatus({ success: false, msg: "Código ya reclamado." });
+      playSynthSound("error");
+      return;
+    }
+    if (matched.rewardType === "coins") {
+      setProfile(prev => ({ ...prev, coins: prev.coins + matched.rewardValue }));
+      setRedeemStatus({ success: true, msg: "+" + matched.rewardValue + " monedas!" });
+    } else if (matched.rewardType === "pack") {
+      const activeCards = catalog.filter(c => c.active !== false);
+      const drawn: Card[] = [];
+      for (let i = 0; i < 3; i++) {
+        const rand = activeCards[Math.floor(Math.random() * activeCards.length)] || defaultCatalog[0];
+        drawn.push(rand);
+      }
+      setProfile(prev => ({
+        ...prev,
+        collection: [...prev.collection, ...drawn.map(c => c.id)]
+      }));
+      setBoughtPack(drawn);
+      setRedeemStatus({ success: true, msg: "¡Reclamaste 1 Booster Pack!" });
+    }
+    setCodes(prev => prev.map(c => c.code.toUpperCase() === cleaned ? { ...c, redeemed: true } : c));
+    setRedeemCode("");
+    playSynthSound("equip");
+  };
+
+  return (
+    <div className="relative flex flex-col w-full h-full text-white bg-gradient-to-br from-[#0c0a21] via-[#16123d] to-[#0c0a21] overflow-hidden select-none">
+      
+      {/* Background illustration overlay */}
+      <div className="absolute inset-0 pointer-events-none opacity-20 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-700 via-transparent to-transparent" />
+      <div 
+        className="absolute inset-0 pointer-events-none opacity-[0.03]"
+        style={{
+          backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)",
+          backgroundSize: "24px 24px"
+        }}
+      />
+
+      {/* Top bar (Header) */}
+      <div className="relative z-10 flex items-center justify-between px-5 pt-3 pb-2 border-b border-purple-900/30 backdrop-blur-sm bg-black/10">
+        
+        {/* Left side: Avatar and student name/level */}
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 border border-amber-400 flex items-center justify-center shadow-[0_0_12px_rgba(245,158,11,0.4)]">
+            <span className="text-xl">🧙‍♀️</span>
+          </div>
+          <div>
+            <div className="flex items-center gap-1.5">
+              <span className="font-['Nunito'] font-black text-sm text-white">{profile.username}</span>
+              <span className="text-[7px] font-black bg-purple-900 text-purple-200 px-1 py-0.5 rounded border border-purple-700/50 uppercase">Explorer Lvl 5</span>
+            </div>
+            <p className="text-[8px] text-purple-400 mt-0.5 uppercase tracking-widest font-bold font-sans">Clash of Words Dashboard</p>
+          </div>
+        </div>
+
+        {/* Right side: Coins, Shop, Redeem, Help */}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 bg-amber-950/40 border border-amber-900/30 px-2.5 py-1 rounded-xl shadow-inner">
+            <span className="text-xs">🪙</span>
+            <span className="text-xs font-black text-amber-300 font-['DM_Mono']">{profile.coins}</span>
+          </div>
+          
+          <button 
+            onClick={() => { setShowShop(true); setBoughtPack(null); }}
+            className="p-2 rounded-xl bg-gradient-to-b from-[#2a2364] to-[#1c174b] border border-purple-700/30 hover:border-purple-500/50 flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer"
+            title="Shop"
+          >
+            <ShoppingBag size={14} className="text-purple-300" />
+          </button>
+          
+          <button 
+            onClick={() => { setShowRedeem(true); setRedeemStatus(null); }}
+            className="p-2 rounded-xl bg-gradient-to-b from-[#2a2364] to-[#1c174b] border border-purple-700/30 hover:border-purple-500/50 flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer"
+            title="Redeem Code"
+          >
+            <Gift size={14} className="text-amber-400" />
+          </button>
+          
+          <button 
+            onClick={() => setShowRules(true)}
+            className="p-2 rounded-xl bg-gradient-to-b from-indigo-700 to-indigo-900 border border-indigo-500/30 hover:border-indigo-400/50 flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-md text-indigo-200 cursor-pointer"
+            title="Help / Rules"
+          >
+            <span className="font-bold text-xs font-['Nunito']">?</span>
+          </button>
+
+          <button onClick={() => onNavigate("login")} className="w-8 h-8 rounded-xl bg-red-950/40 border border-red-900/30 flex items-center justify-center hover:bg-red-900/30 transition-colors cursor-pointer">
+            <LogOut size={13} className="text-red-400" />
+          </button>
+        </div>
+      </div>
+
+      {/* Main Area: Giant PLAY CLASH button */}
+      <div className="flex-1 flex items-center justify-center p-4 z-10 relative">
+        <button
+          onClick={() => onNavigate("game-mat")}
+          className="relative group w-[220px] h-[75px] rounded-3xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 border-3 border-amber-300 shadow-[0_8px_32px_rgba(245,158,11,0.5)] active:scale-95 hover:brightness-110 hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-3 overflow-hidden cursor-pointer"
+        >
+          <div className="absolute inset-0 bg-white/5 opacity-10 bg-[repeating-linear-gradient(45deg,currentColor_0,currentColor_1px,transparent_0,transparent_50%)] bg-[size:8px_8px]" />
+          <Swords size={28} className="text-amber-955 animate-bounce group-hover:scale-110 transition-transform" />
+          <div className="text-left flex flex-col leading-none">
+            <span className="font-['Cinzel'] font-black text-[#1e1402] text-xl tracking-wider">PLAY CLASH</span>
+            <span className="font-['Nunito'] font-bold text-[9px] text-[#4d2f00] uppercase tracking-widest mt-1">Enter Arena Battle</span>
+          </div>
+        </button>
+      </div>
+
+      {/* Bottom square buttons */}
+      <div className="relative z-10 px-6 pb-4 pt-1 flex justify-center gap-5">
+        
+        {/* Collection button */}
+        <button 
+          onClick={() => setShowCollection(true)}
+          className="w-[135px] h-[65px] rounded-2xl bg-[#1e184e]/70 border border-purple-700/40 hover:border-purple-500/60 p-2.5 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98 transition-all text-left shadow-lg cursor-pointer"
+        >
+          <div className="w-10 h-10 rounded-xl bg-purple-900/60 flex items-center justify-center flex-shrink-0">
+            <BookOpen size={18} className="text-purple-300" />
+          </div>
+          <div className="flex flex-col justify-center">
+            <span className="font-['Nunito'] font-black text-white text-xs leading-none">Collection</span>
+            <span className="font-['Nunito'] text-[8px] text-purple-400 mt-1 uppercase font-bold tracking-wider">{profile.collection.length} Cards</span>
+          </div>
+        </button>
+
+        {/* Deck Builder button */}
+        <button 
+          onClick={() => onNavigate("deck-builder")}
+          className="w-[135px] h-[65px] rounded-2xl bg-[#1e184e]/70 border border-purple-700/40 hover:border-purple-500/60 p-2.5 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98 transition-all text-left shadow-lg cursor-pointer"
+        >
+          <div className="w-10 h-10 rounded-xl bg-indigo-900/60 flex items-center justify-center flex-shrink-0">
+            <Layers size={18} className="text-indigo-300" />
+          </div>
+          <div className="flex flex-col justify-center">
+            <span className="font-['Nunito'] font-black text-white text-xs leading-none">Deck Builder</span>
+            <span className="font-['Nunito'] text-[8px] text-indigo-400 mt-1 uppercase font-bold tracking-wider">{profile.activeDeck.length} Active</span>
+          </div>
+        </button>
+
+        {/* Progress button */}
+        <button 
+          onClick={() => setShowProgress(true)}
+          className="w-[135px] h-[65px] rounded-2xl bg-[#1e184e]/70 border border-purple-700/40 hover:border-purple-500/60 p-2.5 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98 transition-all text-left shadow-lg cursor-pointer"
+        >
+          <div className="w-10 h-10 rounded-xl bg-emerald-900/60 flex items-center justify-center flex-shrink-0">
+            <Trophy size={18} className="text-emerald-300" />
+          </div>
+          <div className="flex flex-col justify-center">
+            <span className="font-['Nunito'] font-black text-white text-xs leading-none">Progress</span>
+            <span className="font-['Nunito'] text-[8px] text-emerald-400 mt-1 uppercase font-bold tracking-wider">{profile.wins} Wins</span>
+          </div>
+        </button>
+
+      </div>
+
+      {/* Rules Modal Dialog */}
+      {showRules && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 animate-fade-in">
+          <div className="w-full max-w-lg rounded-2xl bg-[#150f35] border border-indigo-500/50 p-5 shadow-2xl flex flex-col gap-3.5 max-h-[85vh] overflow-y-auto" style={{ scrollbarWidth: "none" }}>
+            <div className="flex items-center justify-between border-b border-indigo-900/50 pb-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">📖</span>
+                <h3 className="font-['Nunito'] font-black text-white text-base">Rules of Clash of Words</h3>
+              </div>
+              <button onClick={() => setShowRules(false)} className="w-7 h-7 rounded-full bg-indigo-950 flex items-center justify-center text-indigo-400 hover:text-white border border-indigo-800/40 cursor-pointer">
+                <X size={14} />
+              </button>
+            </div>
+            
+            <div className="text-xs text-indigo-200 flex flex-col gap-3 leading-relaxed">
+              <p>Clash of Words is an educational cards game. Here are the simple rules to guide your deck builder and battles:</p>
+              
+              <div className="grid grid-cols-2 gap-3 mt-1.5">
+                <div className="bg-[#1f174e]/40 p-2.5 rounded-xl border border-indigo-900/40">
+                  <h4 className="font-bold text-amber-300 text-[10px] uppercase tracking-wider mb-1">1. Build your Deck</h4>
+                  <p className="text-[9px] text-indigo-300">You must select between 20 and 25 cards in the <strong>Deck Builder</strong>. Cards are unlocked by spending coins in the Shop.</p>
+                </div>
+                <div className="bg-[#1f174e]/40 p-2.5 rounded-xl border border-indigo-900/40">
+                  <h4 className="font-bold text-amber-300 text-[10px] uppercase tracking-wider mb-1">2. Draw & Play Cards</h4>
+                  <p className="text-[9px] text-indigo-300">During a duel, draw cards. Drag <strong>Item</strong> or <strong>Effect</strong> cards from your hand onto your Creature in the center to increase its power.</p>
+                </div>
+                <div className="bg-[#1f174e]/40 p-2.5 rounded-xl border border-indigo-900/40">
+                  <h4 className="font-bold text-amber-300 text-[10px] uppercase tracking-wider mb-1">3. Clashing Rules</h4>
+                  <p className="text-[9px] text-indigo-300">Compare active cards. <strong>Higher Rarity</strong> wins first. On rarity ties, <strong>Higher Power</strong> wins. Otherwise, a tie-breaker triggers.</p>
+                </div>
+                <div className="bg-[#1f174e]/40 p-2.5 rounded-xl border border-indigo-900/40">
+                  <h4 className="font-bold text-amber-300 text-[10px] uppercase tracking-wider mb-1">4. Hear Pronunciation</h4>
+                  <p className="text-[9px] text-indigo-300">Practice your English vocabulary! <strong>Long-press (hold down)</strong> any card to hear its system-spoken English pronunciation.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Collection Modal Dialog */}
+      {showCollection && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 animate-fade-in">
+          <div className="w-full max-w-2xl rounded-2xl bg-[#150f35] border border-purple-600/50 p-5 shadow-2xl flex flex-col gap-4 max-h-[85vh]">
+            <div className="flex items-center justify-between border-b border-purple-900/50 pb-2">
+              <div className="flex items-center gap-2">
+                <BookOpen className="text-purple-400" size={18} />
+                <h3 className="font-['Nunito'] font-black text-white text-base">Your Vocabulary Collection ({profile.collection.length} Cards)</h3>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => { setShowShop(true); setBoughtPack(null); }}
+                  className="px-2.5 py-1 bg-amber-500 text-amber-950 rounded-lg text-[10px] font-bold hover:brightness-110 active:scale-95 transition-all shadow-md cursor-pointer"
+                >
+                  🛒 Buy Packs (50🪙)
+                </button>
+                <button onClick={() => setShowCollection(false)} className="w-7 h-7 rounded-full bg-purple-900/30 flex items-center justify-center text-purple-400 hover:text-white cursor-pointer">
+                  <X size={14} />
+                </button>
+              </div>
+            </div>
+            
+            <p className="text-[10px] text-purple-400 leading-tight">Touch any card to zoom, or hold down to hear its system-spoken pronunciation. Spend coins in the Shop to expand your vocabulary library.</p>
+            
+            {/* Scrollable list of cards in grid */}
+            <div className="flex-1 overflow-y-auto grid grid-cols-6 gap-2 pr-1" style={{ scrollbarWidth: "none" }}>
+              {profile.collection.map((id, index) => {
+                const cardObj = catalog.find(c => c.id === id);
+                if (!cardObj) return null;
+                return (
+                  <div 
+                    key={`${id}-${index}`} 
+                    className="scale-90 transform-gpu hover:scale-95 transition-transform"
+                  >
+                    <MiniCard 
+                      {...cardObj} 
+                      onZoom={() => onZoomCard(cardObj)}
+                      onLongPress={() => speakWord(cardObj.name)}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Progress & Stats Modal Dialog */}
+      {showProgress && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 animate-fade-in">
+          <div className="w-full max-w-lg rounded-2xl bg-[#150f35] border border-emerald-600/50 p-5 shadow-2xl flex flex-col gap-3.5 max-h-[85vh]">
+            <div className="flex items-center justify-between border-b border-emerald-900/50 pb-2">
+              <div className="flex items-center gap-2">
+                <Trophy className="text-emerald-400" size={18} />
+                <h3 className="font-['Nunito'] font-black text-white text-base">Your Clash Progress</h3>
+              </div>
+              <button onClick={() => setShowProgress(false)} className="w-7 h-7 rounded-full bg-emerald-950/30 flex items-center justify-center text-emerald-400 hover:text-white cursor-pointer">
+                <X size={14} />
+              </button>
+            </div>
+            
+            {/* Statistics */}
+            <div className="grid grid-cols-3 gap-2 bg-[#1b2b2b]/40 border border-emerald-900/40 rounded-xl p-3 text-center">
+              <div>
+                <p className="text-[18px] font-black text-amber-400 font-['DM_Mono'] leading-none">{profile.trophies}</p>
+                <p className="text-[8px] text-emerald-400 uppercase tracking-widest mt-1">Trophies</p>
+              </div>
+              <div className="border-x border-emerald-900/30">
+                <p className="text-[18px] font-black text-white font-['DM_Mono'] leading-none">{profile.wins}W / {profile.losses}L</p>
+                <p className="text-[8px] text-emerald-400 uppercase tracking-widest mt-1">Clashes Record</p>
+              </div>
+              <div>
+                <p className="text-[18px] font-black text-emerald-300 font-['DM_Mono'] leading-none">
+                  {profile.wins + profile.losses > 0 ? `${Math.round((profile.wins / (profile.wins + profile.losses)) * 100)}%` : "0%"}
+                </p>
+                <p className="text-[8px] text-emerald-400 uppercase tracking-widest mt-1">Win Rate</p>
+              </div>
+            </div>
+
+            {/* Recess Playroom Matches log */}
+            <div className="flex-1 flex flex-col min-h-0">
+              <h4 className="font-['Nunito'] font-black text-white text-[10px] uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <span>🏫 Recess Arena History Logs</span>
+              </h4>
+              <div className="flex-1 overflow-y-auto flex flex-col gap-2 pr-1" style={{ scrollbarWidth: "none" }}>
+                {history.length === 0 ? (
+                  <div className="py-6 text-center border border-dashed border-emerald-900/30 rounded-xl flex-1 flex items-center justify-center">
+                    <p className="text-[10px] text-emerald-600">No match records found.</p>
+                  </div>
+                ) : (
+                  history.map((log) => (
+                    <div key={log.id} className="p-2 bg-[#1b2b2b]/20 border border-emerald-900/30 rounded-xl flex justify-between items-center text-[10px]">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className={log.outcome === "win" ? "text-emerald-400 font-bold" : "text-rose-400 font-bold"}>
+                            {log.outcome === "win" ? "🏆 Win" : "💀 Loss"}
+                          </span>
+                          <span className="text-[8px] text-slate-500">{log.date}</span>
+                        </div>
+                        <p className="text-[9px] text-indigo-300 mt-0.5">Trophy Score: {log.playerTrophiesWon} - {log.opponentTrophiesWon}</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[8px] text-slate-400">Trophies before/after</span>
+                        <p className="text-xs font-black font-['DM_Mono'] text-amber-400">{log.trophiesBefore} ➔ {log.trophiesAfter}</p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Redeem Modal Dialog */}
+      {showRedeem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 animate-fade-in">
+          <div className="w-full max-w-sm rounded-2xl bg-[#150f35] border border-purple-600/50 p-5 shadow-2xl flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Gift className="text-amber-400" size={18} />
+                <h3 className="font-['Nunito'] font-black text-white text-base">Redeem Reward Code</h3>
+              </div>
+              <button onClick={() => setShowRedeem(false)} className="w-7 h-7 rounded-full bg-purple-900/30 flex items-center justify-center text-purple-400 hover:text-white cursor-pointer">
+                <X size={14} />
+              </button>
+            </div>
+            
+            <p className="text-xs text-purple-300">Enter a code distributed by your teacher to claim extra coins or random card packs.</p>
+
+            {redeemStatus && (
+              <div className={`px-3 py-2 rounded-xl border text-xs font-['Nunito'] flex items-center gap-2 ${redeemStatus.success ? "bg-emerald-950/40 border-emerald-600/40 text-emerald-300" : "bg-red-955/40 border-red-800/40 text-red-300"}`}>
+                {redeemStatus.success ? <CheckCircle size={14} className="text-emerald-400" /> : <AlertCircle size={14} className="text-red-400" />}
+                <span>{redeemStatus.msg}</span>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-1.5">
+              <input
+                type="text"
+                value={redeemCode}
+                onChange={(e) => setRedeemCode(e.target.value)}
+                placeholder="e.g. CLASH2026"
+                className="w-full bg-[#221d4a] border border-purple-700/40 rounded-xl px-4 py-2.5 text-white font-['DM_Mono'] text-sm tracking-widest placeholder:text-purple-600 uppercase focus:outline-none focus:border-purple-500 transition-all text-center"
+              />
+            </div>
+
+            <button onClick={handleRedeem} className="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-['Nunito'] font-black text-sm active:scale-95 transition-all">
+              Claim Reward
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Shop Modal Dialog */}
+      {showShop && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 overflow-y-auto">
+          <div className="w-full max-w-sm rounded-2xl bg-[#150f35] border border-purple-600/50 p-5 shadow-2xl flex flex-col gap-4 max-h-[90vh]">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <ShoppingBag className="text-amber-400" size={18} />
+                <h3 className="font-['Nunito'] font-black text-white text-base">Vocabulary Card Shop</h3>
+              </div>
+              <button onClick={() => setShowShop(false)} className="w-7 h-7 rounded-full bg-purple-900/30 flex items-center justify-center text-purple-400 hover:text-white cursor-pointer">
+                <X size={14} />
+              </button>
+            </div>
+
+            <div className="bg-purple-950/20 border border-purple-800/40 rounded-xl p-3 flex justify-between items-center">
+              <span className="text-xs text-purple-300">Your Balance:</span>
+              <span className="text-sm font-black text-amber-300 font-['DM_Mono']">🪙 {profile.coins} Coins</span>
+            </div>
+
+            {/* Shop Product */}
+            {!boughtPack ? (
+              <div className="border border-purple-700/30 rounded-2xl p-4 flex flex-col items-center bg-[#1d164f] text-center gap-3 relative overflow-hidden">
+                <div className="w-20 h-24 rounded-xl bg-gradient-to-b from-purple-500 to-indigo-700 border-2 border-amber-400/80 shadow-[0_0_20px_rgba(245,158,11,0.3)] flex flex-col justify-between p-2 relative">
+                  <div className="absolute inset-0 bg-white/5 opacity-20 bg-[repeating-linear-gradient(45deg,currentColor_0,currentColor_1px,transparent_0,transparent_50%)] bg-[size:6px_6px]" />
+                  <span className="text-[8px] text-amber-300 font-bold tracking-wider uppercase text-center border-b border-amber-400/20 pb-1">CLASH PACK</span>
+                  <Sword size={26} className="text-amber-300 mx-auto" />
+                  <span className="text-[7px] text-amber-100 font-semibold text-center mt-1">3 Random Cards</span>
+                </div>
+                <div>
+                  <h4 className="font-['Nunito'] font-black text-white text-sm">Vocabulary Booster Pack</h4>
+                  <p className="text-[10px] text-purple-400 mt-0.5">Expands your collection with 3 randomly selected words from the active catalog.</p>
+                </div>
+                
+                <button
+                  onClick={buyPack}
+                  disabled={profile.coins < 50 || isOpeningPack}
+                  className={`w-full py-2.5 rounded-xl font-black text-xs transition-all flex items-center justify-center gap-2 ${profile.coins >= 50 && !isOpeningPack ? "bg-amber-500 hover:brightness-110 text-amber-955 active:scale-95" : "bg-purple-955/60 text-purple-600 border border-purple-900/50 cursor-not-allowed"}`}
+                >
+                  {isOpeningPack ? "Opening..." : "Buy Pack for 50 Coins"}
+                </button>
+              </div>
+            ) : (
+              // Pack Opening Results
+              <div className="flex flex-col gap-4 animate-scale-up">
+                <p className="text-xs font-black text-emerald-400 text-center uppercase tracking-wider">🎉 Pack Opened Successfully!</p>
+                <div className="flex gap-2 justify-center">
+                  {boughtPack.map((card, i) => (
+                    <div key={i} className="animate-fade-in-delayed">
+                      <MiniCard {...card} onSpeech={() => speakWord(card.name)} />
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setBoughtPack(null)}
+                  className="w-full py-2.5 bg-purple-700 text-white rounded-xl font-bold text-xs active:scale-95"
+                >
+                  Buy Another Pack
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Starter Loot Claim Overlay */}
+      {profile.collection.length === 0 && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="w-[450px] bg-gradient-to-b from-[#1c1445] to-[#0b0825] border-2 border-amber-500 rounded-3xl p-6 shadow-2xl flex flex-col items-center text-center gap-4 relative animate-scale-up">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center shadow-[0_0_24px_rgba(245,158,11,0.5)] border border-amber-300">
+              <Gift size={32} className="text-white animate-bounce" />
+            </div>
+            
+            <div>
+              <h3 className="font-['Cinzel'] text-2xl font-black text-amber-400 leading-none">¡Reclama tu Botín Inicial!</h3>
+              <p className="font-['Nunito'] text-[10px] text-purple-300 uppercase tracking-widest mt-1.5 font-black">Starter Loot Kit · Clash of Words</p>
+            </div>
+
+            <p className="text-xs text-purple-200 leading-relaxed max-w-sm">
+              ¡Hola, <strong>{profile.username}</strong>! Para empezar a combatir en la Arena y desafiar a otros estudiantes, necesitas un mazo de vocabulario. Reclama tu cofre de bienvenida gratis para recibir:
+            </p>
+
+            <div className="flex gap-4 w-full justify-center my-1.5">
+              <div className="bg-[#241a54]/50 border border-purple-900/40 rounded-2xl px-4 py-3 flex flex-col items-center w-[120px] shadow-md">
+                <span className="text-2xl mb-1">🪙</span>
+                <span className="font-['DM_Mono'] text-xs font-black text-amber-300">+100 Monedas</span>
+              </div>
+              <div className="bg-[#241a54]/50 border border-purple-900/40 rounded-2xl px-4 py-3 flex flex-col items-center w-[120px] shadow-md">
+                <span className="text-2xl mb-1">🃏</span>
+                <span className="font-['Nunito'] text-xs font-black text-purple-300">22 Cartas</span>
+              </div>
+            </div>
+
+            <button
+              onClick={claimStarterLoot}
+              className="w-full max-w-xs py-3.5 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 border-2 border-amber-300 text-white rounded-2xl font-['Nunito'] font-black text-sm hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-orange-500/20 cursor-pointer flex items-center justify-center gap-2"
+            >
+              <Sparkles size={16} /> ¡Abrir Cofre de Bienvenida!
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Claimed Loot Summary Overlay */}
+      {claimedLoot && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="w-[500px] bg-gradient-to-b from-[#1b1544] to-[#090720] border border-purple-500 rounded-3xl p-5 shadow-2xl flex flex-col gap-4 max-h-[85vh]">
+            <div className="text-center">
+              <h3 className="font-['Cinzel'] text-xl font-black text-amber-400">🎁 ¡Botín Obtenido!</h3>
+              <p className="text-[9px] text-purple-400 uppercase font-black tracking-widest mt-0.5">Tus 22 cartas iniciales (Mazo de 20 cartas listo para jugar)</p>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto grid grid-cols-4 gap-2.5 p-2 bg-black/20 rounded-2xl border border-purple-900/30" style={{ scrollbarWidth: "none" }}>
+              {claimedLoot.map((c, i) => (
+                <div key={i} className="flex flex-col items-center gap-1">
+                  <div className="scale-75 origin-top transform-gpu">
+                    <MiniCard 
+                      {...c}
+                    />
+                  </div>
+                  <span className="text-[7px] font-black text-purple-300 truncate max-w-[76px] mt-[-24px] text-center">{c.name}</span>
+                </div>
+              ))}
+            </div>
+
+            <button
+              onClick={() => setClaimedLoot(null)}
+              className="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-['Nunito'] font-black text-xs hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md"
+            >
+              ¡Entendido, vamos a Jugar!
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
