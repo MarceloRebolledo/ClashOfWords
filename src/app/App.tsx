@@ -477,13 +477,27 @@ interface MiniCardProps {
   glowing?: boolean;
   onSpeech?: () => void;
   image?: string;
+  onZoom?: () => void;
+  onLongPress?: () => void;
 }
 
-function MiniCard({ name, type, rarity, power, englishClass, selected, glowing, onSpeech, image }: MiniCardProps) {
+function MiniCard({ name, type, rarity, power, englishClass, selected, glowing, onSpeech, image, onZoom, onLongPress }: MiniCardProps) {
   const grad = RARITY_COLORS_MINI[rarity] ?? RARITY_COLORS_MINI.Common;
   const badge = RARITY_BADGE_MINI[rarity] ?? RARITY_BADGE_MINI.Common;
+
+  const handleCardClick = () => {
+    if (onZoom) onZoom();
+  };
+
+  const handleLongPress = () => {
+    if (onLongPress) onLongPress();
+  };
+
+  const pressProps = (onZoom || onLongPress) ? getLongPressProps(handleLongPress, handleCardClick) : {};
+
   return (
     <div
+      {...pressProps}
       className={`relative rounded-xl overflow-hidden border flex flex-col transition-all duration-300 ${
         glowing ? "border-amber-400 shadow-[0_0_18px_rgba(251,191,36,0.5)]" : "border-purple-700/50"
       } bg-gradient-to-b from-[#1a1540] to-[#0d0b1e]`}
