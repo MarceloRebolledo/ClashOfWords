@@ -1,5 +1,78 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+let ocrMappings = {};
+try {
+  ocrMappings = JSON.parse(fs.readFileSync(path.join(__dirname, './card_names_ocr.json'), 'utf-8'));
+} catch (e) {
+  console.log("Could not load OCR mappings");
+}
+
+function cleanName(name) {
+  if (!name) return name;
+  let clean = name.toLowerCase().split(' ').map(word => {
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  }).join(' ');
+  
+  const manualFixes = {
+    "Walring Lobster": "Walking Lobster",
+    "Coliflower Hair": "Cauliflower Hair",
+    "Sausages Bow And": "Sausages Bow and Arrow",
+    "Sluine": "Slime",
+    "Vaccum Scorpion": "Vacuum Scorpion",
+    "Teats": "Treats",
+    "Fesr": "Fear",
+    "Hin": "Thinking Screwdriver",
+    "Ana": "Winter People",
+    "Eater": "Summer People",
+    "Recycle La": "Recycle",
+    "Bl Pptr En": "Blue Puppet",
+    "Tra An": "Trash Can",
+    "Arn": "Arm",
+    "Trs": "Tree",
+    "A Os Eo": "Avocado",
+    "Lue": "Blue",
+    "Sal A": "Salad",
+    "I San A": "Island",
+    "Eecece": "Ice Cream",
+    "B ve J": "Beaver",
+    "Paper Butterfly J": "Paper Butterfly",
+    "Rn Pe Was": "Rope",
+    "E N": "Hen",
+    "Vane": "Vase",
+    "Pink Tei Y": "Pink Teddy",
+    "Wheel Rite": "Wheelbarrow",
+    "Val Inc Edihittc": "Vocabulary",
+    "Ivy Stingray Rents N": "Ivy Stingray",
+    "Ncl": "Nail",
+    "C N": "Cone",
+    "Ay J": "Ax",
+    "Zr Ir": "Zebra",
+    "Ny Tees": "Keys",
+    "Sa Yea": "Sea",
+    "Iervol Steak": "Iron Steak",
+    "J Fe A": "Giraffe",
+    "Soi Grr": "Scissors",
+    "E En": "Hen",
+    "Rufc Vee": "Ruler",
+    "Nee": "Needle",
+    "Nw Ny": "New York",
+    "Ne Tnte Sant N": "Net",
+    "I Coe": "Ice Cream",
+    "Qo Tt A": "Quota",
+    "Ny Br": "Notebook"
+  };
+  
+  if (manualFixes[clean]) {
+    return manualFixes[clean];
+  }
+  
+  return clean;
+}
 
 const CARDS_ROOT = path.join(__dirname, '../public/cards');
 const OUTPUT_FILE = path.join(__dirname, '../src/app/cardsData.ts');
@@ -185,17 +258,32 @@ function main() {
         power = (idx % 3) + 7; // 7, 8, 9
       }
       
-      const name = generateName(rarityKey, idx, type, englishClass);
       const relativeImagePath = `/cards/${folderName}/${file}`;
-      
-      // Let's create an ability text for Epic/Legendary/Value
+      let name = generateName(rarityKey, idx, type, englishClass);
       let ability = undefined;
-      if (rarityKey === "Legendary") {
-        ability = `Unleashes powerful vocabulary boost of +${power - 2}`;
-      } else if (rarityKey === "Epic") {
-        ability = `Synergizes with other ${englishClass} cards`;
-      } else if (rarityKey === "Value") {
-        ability = `Permanent value boost of +${power} points`;
+      
+      if (ocrMappings[relativeImagePath]) {
+        if (ocrMappings[relativeImagePath].name) {
+          name = cleanName(ocrMappings[relativeImagePath].name);
+          if (englishClass !== "Value") {
+            englishClass = "Noun";
+          }
+        }
+        if (ocrMappings[relativeImagePath].description) {
+          ability = ocrMappings[relativeImagePath].description;
+        }
+      }
+      
+      if (!ability) {
+        if (rarityKey === "Legendary") {
+          ability = `Unleashes powerful vocabulary boost of +${power - 2}`;
+        } else if (rarityKey === "Epic") {
+          ability = `Synergizes with other ${englishClass} cards`;
+        } else if (rarityKey === "Value") {
+          ability = `Permanent value boost of +${power} points`;
+        } else {
+          ability = "Practice your English vocabulary! Hold this card to hear its correct pronunciation.";
+        }
       }
       
       allGeneratedCards.push({

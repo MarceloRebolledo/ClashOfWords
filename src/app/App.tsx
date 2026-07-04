@@ -550,69 +550,89 @@ function LoginScreen({ onNavigate, onStudentLogin }: { onNavigate: (s: Screen) =
   };
 
   return (
-    <div className="relative flex flex-col min-h-full bg-[#0d0b1e] overflow-hidden">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-80 rounded-full bg-purple-700/20 blur-3xl pointer-events-none" />
-      <div className="flex flex-col items-center justify-center flex-1 px-6 pt-12 pb-8 gap-6 relative z-10">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-800 flex items-center justify-center shadow-[0_0_40px_rgba(124,58,237,0.5)] border border-purple-500/40">
-            <Sword size={40} className="text-amber-400 animate-pulse" />
+    <div className="relative flex flex-col h-full bg-[#0d0b1e] overflow-hidden justify-center">
+      {/* Background glows */}
+      <div className="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-purple-700/10 blur-3xl pointer-events-none" />
+      <div className="absolute top-1/2 right-1/4 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-indigo-700/10 blur-3xl pointer-events-none" />
+      
+      <div className="flex flex-row items-center justify-between w-full h-full px-12 py-6 gap-8 relative z-10">
+        
+        {/* Left Column: Logo & Title */}
+        <div className="flex-1 flex flex-col items-center justify-center text-center gap-4 border-r border-purple-955/40 pr-8 h-full">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-800 flex items-center justify-center shadow-[0_0_30px_rgba(124,58,237,0.4)] border border-purple-500/35">
+            <Sword size={32} className="text-amber-400 animate-pulse" />
           </div>
-          <div className="text-center">
-            <h1 className="font-['Cinzel'] text-3xl font-black text-white tracking-wide leading-none">Clash of</h1>
-            <h1 className="font-['Cinzel'] text-3xl font-black text-amber-400 tracking-wide mt-1">Words</h1>
+          <div>
+            <h1 className="font-['Cinzel'] text-2xl font-black text-white tracking-wide leading-none">Clash of</h1>
+            <h1 className="font-['Cinzel'] text-2xl font-black text-amber-400 tracking-wide mt-1 leading-none">Words</h1>
           </div>
-          <p className="text-xs text-purple-300 font-['Nunito'] tracking-widest uppercase">English Card Game · Grades 5–6</p>
+          <p className="text-[10px] text-purple-300 font-['Nunito'] tracking-widest uppercase mt-1">English Card Game<br/>Grades 5–6</p>
         </div>
 
-        <div className="w-full">
-          <p className="text-xs text-purple-400 font-['Nunito'] font-bold mb-2 text-center tracking-wider uppercase">I am a…</p>
-          <div className="flex rounded-xl bg-[#1a1540] p-1 border border-purple-700/30">
-            {(["student", "teacher"] as const).map((r) => (
-              <button key={r} onClick={() => { setRole(r); setErrorMsg(""); }} className={`flex-1 py-2 rounded-lg font-['Nunito'] font-bold text-xs transition-all duration-200 ${role === r ? "bg-purple-600 text-white shadow-[0_2px_12px_rgba(124,58,237,0.5)]" : "text-purple-400 hover:text-white"}`}>
-                {r === "student" ? "⚔️ Student" : "🛡️ Teacher"}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {errorMsg && (
-          <div className="w-full px-3 py-2 bg-red-950/40 border border-red-800/50 rounded-lg flex items-center gap-2">
-            <AlertCircle size={14} className="text-red-400 flex-shrink-0" />
-            <span className="text-[10px] text-red-300 font-['Nunito']">{errorMsg}</span>
-          </div>
-        )}
-
-        <div className="w-full flex flex-col gap-3">
-          <div className="flex flex-col gap-1">
-            <label className="text-[10px] font-['Nunito'] font-bold text-purple-300 uppercase tracking-wider">Username</label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder={role === "student" ? "e.g. Elena_Wizard" : "e.g. admin"}
-              className="w-full bg-[#221d4a] border border-purple-700/40 rounded-xl px-4 py-2.5 text-white font-['Nunito'] text-sm placeholder:text-purple-600 focus:outline-none focus:border-purple-500 transition-all"
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-[10px] font-['Nunito'] font-bold text-purple-300 uppercase tracking-wider font-semibold">Password</label>
-            <div className="relative">
-              <input
-                type={showPass ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder={role === "student" ? "Not required (optional)" : "e.g. admin"}
-                className="w-full bg-[#221d4a] border border-purple-700/40 rounded-xl px-4 py-2.5 pr-11 text-white font-['Nunito'] text-sm placeholder:text-purple-600 focus:outline-none focus:border-purple-500 transition-all"
-              />
-              <button onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-purple-500 hover:text-purple-300 transition-colors">
-                {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
+        {/* Right Column: Login Form */}
+        <div className="flex-1 flex flex-col justify-center gap-3.5 h-full max-w-[360px]">
+          <div>
+            <p className="text-[9px] text-purple-400 font-['Nunito'] font-bold mb-1.5 tracking-wider uppercase">I am a…</p>
+            <div className="flex rounded-xl bg-[#1a1540] p-0.5 border border-purple-700/20">
+              {(["student", "teacher"] as const).map((r) => (
+                <button 
+                  key={r} 
+                  onClick={() => { setRole(r); setErrorMsg(""); }} 
+                  className={`flex-1 py-1.5 rounded-lg font-['Nunito'] font-bold text-[10px] transition-all duration-200 ${role === r ? "bg-purple-600 text-white shadow-[0_2px_8px_rgba(124,58,237,0.4)]" : "text-purple-400 hover:text-white"}`}
+                >
+                  {r === "student" ? "⚔️ Student" : "🛡️ Teacher"}
+                </button>
+              ))}
             </div>
           </div>
+
+          {errorMsg && (
+            <div className="px-2.5 py-1.5 bg-red-955/30 border border-red-800/40 rounded-lg flex items-center gap-2">
+              <AlertCircle size={12} className="text-red-400 flex-shrink-0" />
+              <span className="text-[9px] text-red-300 font-['Nunito'] leading-tight">{errorMsg}</span>
+            </div>
+          )}
+
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-0.5">
+              <label className="text-[9px] font-['Nunito'] font-bold text-purple-300 uppercase tracking-wider">
+                {role === "student" ? "Username (Simulated ID)" : "Username"}
+              </label>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder={role === "student" ? "e.g. Elena_Wizard" : "e.g. admin"}
+                className="w-full bg-[#221d4a] border border-purple-700/30 rounded-xl px-3 py-1.5 text-white font-['Nunito'] text-xs placeholder:text-purple-600/70 focus:outline-none focus:border-purple-500 transition-all"
+              />
+            </div>
+            {role === "teacher" && (
+              <div className="flex flex-col gap-0.5">
+                <label className="text-[9px] font-['Nunito'] font-bold text-purple-300 uppercase tracking-wider font-semibold">Password</label>
+                <div className="relative">
+                  <input
+                    type={showPass ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="e.g. admin"
+                    className="w-full bg-[#221d4a] border border-purple-700/30 rounded-xl px-3 py-1.5 pr-9 text-white font-['Nunito'] text-xs placeholder:text-purple-600/70 focus:outline-none focus:border-purple-500 transition-all"
+                  />
+                  <button onClick={() => setShowPass(!showPass)} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-purple-500 hover:text-purple-300 transition-colors">
+                    {showPass ? <EyeOff size={13} /> : <Eye size={13} />}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <button 
+            onClick={handleLogin} 
+            className="w-full py-2.5 rounded-xl font-['Nunito'] font-black text-xs bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-[0_2px_12px_rgba(124,58,237,0.4)] transition-all active:scale-95 flex items-center justify-center gap-1.5"
+          >
+            Enter the Arena <ArrowRight size={13} />
+          </button>
         </div>
 
-        <button onClick={handleLogin} className="w-full py-3.5 rounded-xl font-['Nunito'] font-black text-sm bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-[0_4px_24px_rgba(124,58,237,0.5)] transition-all active:scale-95 flex items-center justify-center gap-2">
-          Enter the Arena <ArrowRight size={16} />
-        </button>
       </div>
     </div>
   );
@@ -726,13 +746,13 @@ function StudentHubScreen({ onNavigate, profile, setProfile, codes, setCodes, ca
       return;
     }
     if (matched.redeemed) {
-      setRedeemStatus({ success: false, msg: "Código ya reclamado." });
+      setRedeemStatus({ success: false, msg: "Code already claimed." });
       playSynthSound("error");
       return;
     }
     if (matched.rewardType === "coins") {
       setProfile(prev => ({ ...prev, coins: prev.coins + matched.rewardValue }));
-      setRedeemStatus({ success: true, msg: "+" + matched.rewardValue + " monedas!" });
+      setRedeemStatus({ success: true, msg: "+" + matched.rewardValue + " coins!" });
     } else if (matched.rewardType === "pack") {
       const activeCards = catalog.filter(c => c.active !== false);
       const drawn: Card[] = [];
@@ -1142,68 +1162,66 @@ function StudentHubScreen({ onNavigate, profile, setProfile, codes, setCodes, ca
       {/* Starter Loot Claim Overlay */}
       {profile.collection.length === 0 && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="w-[450px] bg-gradient-to-b from-[#1c1445] to-[#0b0825] border-2 border-amber-500 rounded-3xl p-6 shadow-2xl flex flex-col items-center text-center gap-4 relative animate-scale-up">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center shadow-[0_0_24px_rgba(245,158,11,0.5)] border border-amber-300">
-              <Gift size={32} className="text-white animate-bounce" />
+          <div className="w-[500px] bg-gradient-to-b from-[#1c1445] to-[#0b0825] border-2 border-amber-500 rounded-3xl p-4 shadow-2xl flex flex-row items-center text-center gap-4 relative animate-scale-up">
+            {/* Left Column: Icon & Welcoming */}
+            <div className="flex-1 flex flex-col items-center text-center gap-2 border-r border-purple-900/30 pr-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center shadow-lg border border-amber-300">
+                <Gift size={24} className="text-white animate-bounce" />
+              </div>
+              <h3 className="font-['Cinzel'] text-base font-black text-amber-400 leading-none">Starter Loot!</h3>
+              <p className="text-[9px] text-purple-200 leading-normal mt-1">
+                Hello, <strong>{profile.username}</strong>! To start battling in the Arena, you need to claim your free chest:
+              </p>
             </div>
             
-            <div>
-              <h3 className="font-['Cinzel'] text-2xl font-black text-amber-400 leading-none">¡Reclama tu Botín Inicial!</h3>
-              <p className="font-['Nunito'] text-[10px] text-purple-300 uppercase tracking-widest mt-1.5 font-black">Starter Loot Kit · Clash of Words</p>
-            </div>
-
-            <p className="text-xs text-purple-200 leading-relaxed max-w-sm">
-              ¡Hola, <strong>{profile.username}</strong>! Para empezar a combatir en la Arena y desafiar a otros estudiantes, necesitas un mazo de vocabulario. Reclama tu cofre de bienvenida gratis para recibir:
-            </p>
-
-            <div className="flex gap-4 w-full justify-center my-1.5">
-              <div className="bg-[#241a54]/50 border border-purple-900/40 rounded-2xl px-4 py-3 flex flex-col items-center w-[120px] shadow-md">
-                <span className="text-2xl mb-1">🪙</span>
-                <span className="font-['DM_Mono'] text-xs font-black text-amber-300">+100 Monedas</span>
+            {/* Right Column: Loot contents & button */}
+            <div className="flex-1 flex flex-col gap-3">
+              <div className="flex gap-2 justify-center">
+                <div className="bg-[#241a54]/50 border border-purple-900/40 rounded-xl px-2.5 py-1.5 flex flex-col items-center w-[90px] shadow-sm">
+                  <span className="text-base">🪙</span>
+                  <span className="font-['DM_Mono'] text-[9px] font-black text-amber-300">+100 Coins</span>
+                </div>
+                <div className="bg-[#241a54]/50 border border-purple-900/40 rounded-xl px-2.5 py-1.5 flex flex-col items-center w-[90px] shadow-sm">
+                  <span className="text-base">🃏</span>
+                  <span className="font-['Nunito'] text-[9px] font-black text-purple-300">22 Cards</span>
+                </div>
               </div>
-              <div className="bg-[#241a54]/50 border border-purple-900/40 rounded-2xl px-4 py-3 flex flex-col items-center w-[120px] shadow-md">
-                <span className="text-2xl mb-1">🃏</span>
-                <span className="font-['Nunito'] text-xs font-black text-purple-300">22 Cartas</span>
-              </div>
+              <button
+                onClick={claimStarterLoot}
+                className="w-full py-2.5 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 border border-amber-300 text-white rounded-xl font-['Nunito'] font-black text-xs hover:brightness-110 active:scale-95 transition-all shadow-md cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <Sparkles size={13} /> Open Chest!
+              </button>
             </div>
-
-            <button
-              onClick={claimStarterLoot}
-              className="w-full max-w-xs py-3.5 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 border-2 border-amber-300 text-white rounded-2xl font-['Nunito'] font-black text-sm hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-orange-500/20 cursor-pointer flex items-center justify-center gap-2"
-            >
-              <Sparkles size={16} /> ¡Abrir Cofre de Bienvenida!
-            </button>
           </div>
         </div>
       )}
 
       {/* Claimed Loot Summary Overlay */}
       {claimedLoot && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="w-[500px] bg-gradient-to-b from-[#1b1544] to-[#090720] border border-purple-500 rounded-3xl p-5 shadow-2xl flex flex-col gap-4 max-h-[85vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-3 animate-fade-in">
+          <div className="w-[520px] bg-gradient-to-b from-[#1b1544] to-[#090720] border border-purple-500/50 rounded-2xl p-4 shadow-2xl flex flex-col gap-3 max-h-[90vh]">
             <div className="text-center">
-              <h3 className="font-['Cinzel'] text-xl font-black text-amber-400">🎁 ¡Botín Obtenido!</h3>
-              <p className="text-[9px] text-purple-400 uppercase font-black tracking-widest mt-0.5">Tus 22 cartas iniciales (Mazo de 20 cartas listo para jugar)</p>
+              <h3 className="font-['Cinzel'] text-base font-black text-amber-400">🎁 Loot Claimed!</h3>
+              <p className="text-[8px] text-purple-400 uppercase font-black tracking-wider mt-0.5">Your 22 starter cards (Deck ready to play)</p>
             </div>
             
-            <div className="flex-1 overflow-y-auto grid grid-cols-4 gap-2.5 p-2 bg-black/20 rounded-2xl border border-purple-900/30" style={{ scrollbarWidth: "none" }}>
+            <div className="flex-1 overflow-y-auto grid grid-cols-7 gap-1.5 p-1.5 bg-black/20 rounded-xl border border-purple-900/30 min-h-0" style={{ scrollbarWidth: "none" }}>
               {claimedLoot.map((c, i) => (
-                <div key={i} className="flex flex-col items-center gap-1">
-                  <div className="scale-75 origin-top transform-gpu">
-                    <MiniCard 
-                      {...c}
-                    />
+                <div key={i} className="flex flex-col items-center">
+                  <div className="scale-[0.6] origin-top transform-gpu">
+                    <MiniCard {...c} />
                   </div>
-                  <span className="text-[7px] font-black text-purple-300 truncate max-w-[76px] mt-[-24px] text-center">{c.name}</span>
+                  <span className="text-[6px] font-black text-purple-300 truncate max-w-[50px] mt-[-28px] text-center leading-none">{c.name}</span>
                 </div>
               ))}
             </div>
 
             <button
               onClick={() => setClaimedLoot(null)}
-              className="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-['Nunito'] font-black text-xs hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md"
+              className="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-['Nunito'] font-black text-xs hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md flex-shrink-0"
             >
-              ¡Entendido, vamos a Jugar!
+              Understood, let's play!
             </button>
           </div>
         </div>
@@ -1222,6 +1240,7 @@ interface DeckBuilderProps {
 
 function DeckBuilderScreen({ onNavigate, profile, setProfile, catalog }: DeckBuilderProps) {
   const [selected, setSelected] = useState<Set<string>>(() => new Set(profile.activeDeck));
+  const [previewCard, setPreviewCard] = useState<Card | null>(null);
 
   const activeCardsCount = selected.size;
   const valid = activeCardsCount >= 20 && activeCardsCount <= 25;
@@ -1252,67 +1271,109 @@ function DeckBuilderScreen({ onNavigate, profile, setProfile, catalog }: DeckBui
   // Group collection to show available copies
   const collectionList = profile.collection.map(id => catalog.find(c => c.id === id)).filter((c): c is Card => !!c && c.active !== false);
 
+  // Set default preview card
+  useEffect(() => {
+    if (collectionList.length > 0 && !previewCard) {
+      setPreviewCard(collectionList[0]);
+    }
+  }, [collectionList, previewCard]);
+
   return (
-    <div className="flex flex-col min-h-full bg-[#0d0b1e]">
-      <div className="flex items-center gap-3 px-5 pt-6 pb-4">
-        <button onClick={() => onNavigate("student-hub")} className="w-9 h-9 rounded-lg bg-[#221d4a] flex items-center justify-center border border-purple-700/30 hover:bg-purple-900/30 transition-colors">
-          <ChevronLeft size={16} className="text-purple-400" />
+    <div className="flex flex-col h-full bg-[#0d0b1e] overflow-hidden">
+      <div className="flex items-center gap-3 px-5 pt-3 pb-2 flex-shrink-0">
+        <button onClick={() => onNavigate("student-hub")} className="w-8 h-8 rounded-lg bg-[#221d4a] flex items-center justify-center border border-purple-700/30 hover:bg-purple-900/30 transition-colors">
+          <ChevronLeft size={14} className="text-purple-400" />
         </button>
         <div className="flex-1">
-          <h2 className="font-['Nunito'] font-black text-white text-base leading-none">Deck Builder</h2>
-          <p className="font-['Nunito'] text-[10px] text-purple-400">Select your battle deck</p>
+          <h2 className="font-['Nunito'] text-sm font-black text-white leading-none">Deck Builder</h2>
+          <p className="font-['Nunito'] text-[8px] text-purple-400 mt-0.5">Select your battle deck</p>
         </div>
         <button
           onClick={handleSave}
           disabled={!valid}
-          className={`px-3.5 py-1.5 rounded-lg font-['Nunito'] font-bold text-xs text-white transition-all ${valid ? "bg-purple-600 hover:bg-purple-500 active:scale-95" : "bg-purple-950 text-purple-700 cursor-not-allowed border border-purple-900/50"}`}
+          className={`px-3 py-1 rounded-lg font-['Nunito'] font-bold text-xs text-white transition-all ${valid ? "bg-purple-600 hover:bg-purple-500 active:scale-95" : "bg-purple-955 text-purple-700 cursor-not-allowed border border-purple-900/50"}`}
         >
           Save
         </button>
       </div>
 
       {/* Validation Message */}
-      <div className={`mx-5 mb-4 rounded-xl px-4 py-2.5 flex items-center gap-2.5 border ${valid ? "bg-emerald-900/30 border-emerald-700/50" : activeCardsCount < 20 ? "bg-amber-900/30 border-amber-700/50" : "bg-red-900/30 border-red-700/50"}`}>
-        {valid ? <CheckCircle size={16} className="text-emerald-400 flex-shrink-0" /> : <AlertCircle size={16} className="text-amber-400 flex-shrink-0" />}
+      <div className={`mx-5 mb-2 rounded-xl px-4 py-1.5 flex items-center gap-2.5 border flex-shrink-0 ${valid ? "bg-emerald-900/30 border-emerald-700/50" : activeCardsCount < 20 ? "bg-amber-900/30 border-amber-700/50" : "bg-red-900/30 border-red-700/50"}`}>
+        {valid ? <CheckCircle size={14} className="text-emerald-400 flex-shrink-0" /> : <AlertCircle size={14} className="text-amber-400 flex-shrink-0" />}
         <div className="flex-1">
           <p className={`font-['Nunito'] font-bold text-xs ${valid ? "text-emerald-300" : "text-amber-300"}`}>{activeCardsCount} / 25 cards selected</p>
-          <p className="font-['Nunito'] text-[10px] text-purple-400">Min 20–25 cards required to play</p>
+          <p className="font-['Nunito'] text-[8px] text-purple-400">Min 20–25 cards required to play</p>
         </div>
         <div className={`text-xs font-black font-['Nunito'] ${valid ? "text-emerald-400" : activeCardsCount < 20 ? "text-amber-400" : "text-red-400"}`}>
           {valid ? "✓ Ready" : activeCardsCount < 20 ? `+${20 - activeCardsCount}` : "Max"}
         </div>
       </div>
 
-      {/* Available collection list */}
-      <div className="flex-1 px-5 pb-6 grid grid-cols-3 gap-2.5 overflow-y-auto" style={{ scrollbarWidth: "none" }}>
-        {collectionList.length === 0 ? (
-          <div className="col-span-3 flex flex-col items-center justify-center py-12 text-center">
-            <Layers className="text-purple-800 mb-2" size={32} />
-            <p className="text-xs text-purple-400 font-bold">Your collection is empty!</p>
-            <p className="text-[10px] text-purple-600 mt-1">Buy vocabulary packs in the Shop.</p>
-          </div>
-        ) : (
-          collectionList.map((c, index) => {
-            const isSel = selected.has(c.id);
-            return (
-              <div
-                key={`${c.id}-${index}`}
-                role="button"
-                tabIndex={0}
-                onClick={() => toggleCard(c.id)}
-                onKeyDown={(e) => e.key === "Enter" && toggleCard(c.id)}
-                className={`relative rounded-xl overflow-hidden border transition-all cursor-pointer ${isSel ? "border-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.4)] scale-[1.02]" : "border-purple-700/40 opacity-70"}`}
-              >
-                <MiniCard {...c} glowing={isSel} onSpeech={() => speakWord(c.name)} />
-                {isSel && (
-                  <div className="absolute top-1 right-1 w-4 h-4 rounded-full bg-amber-400 flex items-center justify-center">
-                    <CheckCircle size={10} className="text-amber-900" />
-                  </div>
-                )}
+      {/* Main split view */}
+      <div className="flex-1 flex flex-row px-5 pb-4 gap-4 overflow-hidden min-h-0">
+        
+        {/* Left Side: Card Grid (Scrollable) */}
+        <div className="flex-1 overflow-y-auto grid grid-cols-5 gap-2 pr-1" style={{ scrollbarWidth: "none" }}>
+          {collectionList.length === 0 ? (
+            <div className="col-span-5 flex flex-col items-center justify-center py-12 text-center">
+              <Layers className="text-purple-800 mb-2" size={32} />
+              <p className="text-xs text-purple-400 font-bold">Your collection is empty!</p>
+              <p className="text-[10px] text-purple-600 mt-1">Buy vocabulary packs in the Shop.</p>
+            </div>
+          ) : (
+            collectionList.map((c, index) => {
+              const isSel = selected.has(c.id);
+              return (
+                <div
+                  key={`${c.id}-${index}`}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => {
+                    toggleCard(c.id);
+                    setPreviewCard(c);
+                  }}
+                  onMouseEnter={() => setPreviewCard(c)}
+                  onKeyDown={(e) => e.key === "Enter" && toggleCard(c.id)}
+                  className={`relative rounded-xl overflow-hidden border transition-all cursor-pointer ${isSel ? "border-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.3)] scale-[1.02]" : "border-purple-700/40 opacity-70 hover:opacity-100"}`}
+                >
+                  <MiniCard {...c} glowing={isSel} onSpeech={() => speakWord(c.name)} />
+                  {isSel && (
+                    <div className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-amber-400 flex items-center justify-center">
+                      <CheckCircle size={8} className="text-amber-900" />
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Right Side: Preview Panel */}
+        <div className="w-[180px] flex flex-col items-center bg-[#151138]/50 border border-purple-800/20 rounded-2xl p-3 shadow-inner flex-shrink-0 justify-center">
+          {previewCard ? (
+            <div className="w-full flex flex-col items-center text-center gap-2">
+              <div className="scale-90 transform-gpu my-1">
+                <FullCard card={previewCard} onZoom={() => {}} />
               </div>
-            );
-          })
-        )}
+              <div className="w-full">
+                <h4 className="font-['Nunito'] font-black text-white text-xs leading-tight truncate">{previewCard.name}</h4>
+                <p className="text-[7.5px] text-purple-400 mt-0.5 uppercase tracking-wider font-black">{previewCard.type} · {previewCard.rarity}</p>
+                <div className="bg-[#1b1742] border border-purple-900/30 rounded-xl p-2 mt-2 text-left">
+                  <p className="text-[8.5px] text-purple-200 italic leading-snug">
+                    {previewCard.ability || "This vocabulary card is part of your collection. Equip it to play in the Arena."}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center p-4">
+              <Layers className="text-purple-900/40 mx-auto mb-2" size={24} />
+              <p className="text-[9px] text-purple-500 font-bold uppercase tracking-wider">Hover / Tap card</p>
+              <p className="text-[8px] text-purple-700 mt-1">To preview full descriptions here</p>
+            </div>
+          )}
+        </div>
+
       </div>
     </div>
   );
@@ -1437,31 +1498,42 @@ function GameMatScreen({ onNavigate, profile, setProfile, catalog, setMatchHisto
   // Draw card helper
   const drawCardToHand = () => {
     if (playerDeck.length === 0) {
-      showToast("No quedan cartas en el mazo.");
+      showToast("No cards left in the draw deck.");
       return;
     }
     if (playerHand.length >= 5) {
-      showToast("Tu mano está llena (límite de 5 cartas).");
+      showToast("Your hand is full (limit of 5 cards).");
       return;
     }
+    if (tutorialStep === 1) {
+      const creature = playerDeck.find(c => c.type === "Creature") || catalog.find(c => c.type === "Creature") || defaultCatalog[0];
+      setPlayerActive(creature);
+
+      const itemCard = playerDeck.find(c => c.type === "Item" || c.type === "Effect") || catalog.find(c => c.type === "Item") || defaultCatalog[1];
+      
+      setPlayerDeck(prev => prev.filter(c => c.id !== creature.id && c.id !== itemCard.id));
+      setPlayerHand(prev => [...prev, itemCard]);
+
+      setTutorialStep(2);
+      playSynthSound("equip");
+      return;
+    }
+
     const drawn = playerDeck[0];
     setPlayerDeck(prev => prev.slice(1));
     setPlayerHand(prev => [...prev, drawn]);
     playSynthSound("equip");
-    if (tutorialStep === 1) {
-      setTutorialStep(2);
-    }
   };
 
   // Play card from hand onto creature (buffs active creature)
   const playCardFromHand = (card: Card) => {
     if (!playerActive) {
-      showToast("Debes tener una criatura activa para equipar este objeto.");
+      showToast("You must have an active creature to equip this card.");
       playSynthSound("error");
       return;
     }
     if (card.type !== "Item" && card.type !== "Effect") {
-      showToast("Solo puedes equipar cartas de tipo Item o Effect.");
+      showToast("You can only equip Item or Effect cards.");
       playSynthSound("error");
       return;
     }
@@ -1493,13 +1565,23 @@ function GameMatScreen({ onNavigate, profile, setProfile, catalog, setMatchHisto
     setMatchPhase("clashing");
     setClashResult(null);
 
+    let currentPActive = playerActive;
+    let currentOActive = opponentActive;
+
+    if (matchPhase === "resolved") {
+      currentPActive = null;
+      currentOActive = null;
+      setPlayerActive(null);
+      setOpponentActive(null);
+    }
+
     // Draw top cards
-    const pCard = playerActive || playerDeck[0];
-    const oCard = opponentActive || opponentDeck[0];
+    const pCard = currentPActive || playerDeck[0];
+    const oCard = currentOActive || opponentDeck[0];
 
     // Remove from deck if they were not already active
-    if (!playerActive) setPlayerDeck(prev => prev.slice(1));
-    if (!opponentActive) setOpponentDeck(prev => prev.slice(1));
+    if (!currentPActive) setPlayerDeck(prev => prev.slice(1));
+    if (!currentOActive) setOpponentDeck(prev => prev.slice(1));
 
     setPlayerActive(pCard);
     setOpponentActive(oCard);
@@ -1618,7 +1700,9 @@ function GameMatScreen({ onNavigate, profile, setProfile, catalog, setMatchHisto
 
   // Run autoplay turn sequence
   useEffect(() => {
-    if (autoplay && matchPhase === "ready") {
+    if (!autoplay) return;
+
+    if (matchPhase === "ready") {
       // Auto-draw if hand empty
       if (playerHand.length === 0 && playerDeck.length > 0) {
         drawCardToHand();
@@ -1628,7 +1712,23 @@ function GameMatScreen({ onNavigate, profile, setProfile, catalog, setMatchHisto
       }, 1800);
       return () => clearTimeout(timeout);
     }
-  }, [autoplay, matchPhase, playerHand.length]);
+
+    if (matchPhase === "resolved") {
+      const timeout = setTimeout(() => {
+        setPlayerActive(null);
+        setOpponentActive(null);
+        setMatchPhase("ready");
+      }, 2500);
+      return () => clearTimeout(timeout);
+    }
+
+    if (matchPhase === "tie_breaker") {
+      const timeout = setTimeout(() => {
+        playClashTurn();
+      }, 2500);
+      return () => clearTimeout(timeout);
+    }
+  }, [autoplay, matchPhase, playerHand.length, playerDeck.length]);
 
   // Finish match, compute rewards and history
   const handleMatchEnd = () => {
@@ -1909,17 +2009,17 @@ function GameMatScreen({ onNavigate, profile, setProfile, catalog, setMatchHisto
 
       {/* Tutorial overlay wizard */}
       {tutorialStep !== null && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/75 p-4 animate-fade-in">
-          <div className="max-w-xs rounded-xl bg-[#150f35] border border-amber-500/50 p-4 text-center flex flex-col gap-3 shadow-2xl">
+        <div className="absolute top-12 left-4 z-50 pointer-events-auto animate-fade-in">
+          <div className="max-w-[180px] rounded-xl bg-[#150f35]/95 border-2 border-amber-500 p-3 text-center flex flex-col gap-2.5 shadow-[0_0_20px_rgba(245,158,11,0.3)]">
             <div className="flex items-center gap-1.5 justify-center">
-              <span className="text-lg">✨</span>
-              <h4 className="font-['Nunito'] font-black text-amber-400 text-xs uppercase tracking-wider">Tutorial: First Clash</h4>
+              <span className="text-sm">✨</span>
+              <h4 className="font-['Nunito'] font-black text-amber-400 text-[10px] uppercase tracking-wider">Tutorial</h4>
             </div>
-            <p className="text-[10px] text-purple-200 leading-normal font-sans">
-              {tutorialStep === 1 && "¡Bienvenido! Toca el Mazo de Robo (Draw Deck) a la derecha para robar cartas a tu mano."}
-              {tutorialStep === 2 && "¡Genial! Ahora selecciona una carta de Ítem en tu mano (con clic o arrastrándola) y ponla sobre tu criatura activa en el centro."}
-              {tutorialStep === 3 && "¡Excelente! Ahora haz clic en el botón 'Clash! Reveal Cards' de arriba para resolver tu combate."}
-              {tutorialStep === 4 && "¡Felicitaciones! Has completado tu primer Clash de forma exitosa. Haz clic en continuar."}
+            <p className="text-[9px] text-purple-200 leading-normal font-sans text-left">
+              {tutorialStep === 1 && "Welcome! Tap the Draw Deck on the right to draw cards to your hand."}
+              {tutorialStep === 2 && "Great! Now select an Item card in your hand (by clicking or dragging it) and place it on top of your active creature in the center."}
+              {tutorialStep === 3 && "Excellent! Now click the 'Clash! Reveal Cards' button above to resolve your combat."}
+              {tutorialStep === 4 && "Congratulations! You have successfully completed your first Clash. Click continue."}
             </p>
             {tutorialStep === 4 ? (
               <button
@@ -1927,58 +2027,21 @@ function GameMatScreen({ onNavigate, profile, setProfile, catalog, setMatchHisto
                   localStorage.setItem("cow_tutorial_completed", "true");
                   setTutorialStep(null);
                 }}
-                className="w-full py-2 bg-amber-500 text-amber-955 rounded-lg text-[10px] font-black hover:brightness-110 active:scale-95 cursor-pointer"
+                className="w-full py-1.5 bg-amber-500 text-amber-955 rounded-lg text-[9px] font-black hover:brightness-110 active:scale-95 cursor-pointer"
               >
-                Continuar
+                Continue
               </button>
             ) : (
-              <span className="text-[8px] text-amber-500/70 italic uppercase tracking-wider">Sigue las instrucciones del juego...</span>
+              <span className="text-[7px] text-amber-500/70 italic uppercase tracking-wider">Follow instructions...</span>
             )}
           </div>
         </div>
       )}
 
-      {/* Match Outcome Summary Overlay */}
-      {matchPhase === "game_over" && matchOutcome && (
-        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/95 px-6 text-center animate-fade-in">
-          <Trophy size={42} className="text-amber-400 mb-2 animate-bounce" />
-          <h2 className="font-['Cinzel'] text-xl font-black tracking-wide text-white uppercase leading-none">
-            {matchOutcome.outcome === "win" ? "🏆 Victory!" : "💀 Defeat"}
-          </h2>
-          <p className="text-[8px] text-purple-400 mt-1 mb-4 uppercase tracking-widest font-bold">Match Simulation Completed</p>
-          
-          <div className="w-full max-w-xs rounded-xl bg-[#1a1540] border border-purple-800/40 p-3 flex flex-col gap-2 mb-4">
-            <div className="flex justify-between items-center border-b border-purple-800/30 pb-1 text-[10px]">
-              <span className="text-purple-300 font-bold uppercase">Your Trophies</span>
-              <span className="font-black text-amber-400 font-['DM_Mono']">{matchOutcome.playerTrophies}</span>
-            </div>
-            <div className="flex justify-between items-center border-b border-purple-800/30 pb-1 text-[10px]">
-              <span className="text-purple-300 font-bold uppercase">Opponent Trophies</span>
-              <span className="font-black text-red-400 font-['DM_Mono']">{matchOutcome.opponentTrophies}</span>
-            </div>
-            <div className="flex justify-between items-center border-b border-purple-800/30 pb-1 text-[10px]">
-              <span className="text-purple-300 font-bold uppercase">Coins Reward</span>
-              <span className="font-black text-emerald-400 font-['DM_Mono']">+{matchOutcome.coinsEarned} Coins</span>
-            </div>
-            <div className="flex justify-between items-center text-[10px]">
-              <span className="text-purple-300 font-bold uppercase">Trophies Modifier</span>
-              <span className={`font-black font-['DM_Mono'] ${matchOutcome.trophyChange >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
-                {matchOutcome.trophyChange >= 0 ? '+' + matchOutcome.trophyChange : matchOutcome.trophyChange}
-              </span>
-            </div>
-          </div>
-
-          <button
-            onClick={() => { setMatchPhase("idle"); onNavigate("student-hub"); }}
-            className="w-full max-w-xs py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black text-[10px] uppercase tracking-wider rounded-xl hover:brightness-110 active:scale-95 transition-all shadow-md cursor-pointer"
-          >
-            Claim Rewards & Return
-          </button>
-        </div>
-      )}
     </div>
   );
 }
+
 // ─── TEACHER VERIFY PIN SCREEN ────────────────────────────────────────────────
 
 function TeacherVerifyScreen({ onNavigate }: { onNavigate: (s: Screen) => void }) {
@@ -2008,45 +2071,66 @@ function TeacherVerifyScreen({ onNavigate }: { onNavigate: (s: Screen) => void }
   };
 
   return (
-    <div className="relative flex flex-col min-h-full bg-[#0d0b1e] overflow-hidden">
-      <div className="flex flex-col items-center flex-1 px-6 pt-16 pb-8 gap-8 relative z-10">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-indigo-700 to-purple-900 flex items-center justify-center border-2 border-indigo-500/50 shadow-[0_0_48px_rgba(79,70,229,0.5)]">
-            <Shield size={44} className="text-indigo-200" />
+    <div className="relative flex flex-col h-full bg-[#0d0b1e] overflow-hidden justify-center">
+      {/* Background glow */}
+      <div className="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-indigo-700/10 blur-3xl pointer-events-none" />
+      
+      <div className="flex flex-row items-center justify-between w-full h-full px-12 py-6 gap-8 relative z-10">
+        
+        {/* Left Column: Icon & Titles */}
+        <div className="flex-1 flex flex-col items-center justify-center text-center gap-4 border-r border-purple-955/40 pr-8 h-full">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-700 to-purple-900 flex items-center justify-center border-2 border-indigo-500/50 shadow-[0_0_30px_rgba(79,70,229,0.4)]">
+            <Shield size={32} className="text-indigo-200 animate-pulse" />
           </div>
-          <div className="text-center animate-pulse">
-            <h2 className="font-['Cinzel'] text-xl font-black text-white">Verificar Identidad</h2>
-            <p className="font-['Cinzel'] text-base text-indigo-300">del Administrador</p>
-            <p className="mt-2 font-['Nunito'] text-xs text-purple-500">Enter your 6-digit security PIN to access the Teacher Portal</p>
+          <div>
+            <h2 className="font-['Cinzel'] text-xl font-black text-white leading-none">Verify</h2>
+            <h2 className="font-['Cinzel'] text-xl font-black text-indigo-300 mt-1 leading-none">Identity</h2>
+          </div>
+          <p className="text-[10px] text-purple-500 font-['Nunito'] mt-1">Admin Portal PIN verification</p>
+        </div>
+
+        {/* Right Column: Code input & Verify button */}
+        <div className="flex-1 flex flex-col justify-center gap-4 h-full max-w-[360px]">
+          <p className="text-[10px] text-purple-400 font-['Nunito'] text-center">Enter the 6-digit security PIN:</p>
+          
+          <div className="flex justify-center gap-1.5">
+            {pin.map((d, i) => (
+              <input
+                key={i}
+                id={`pin-${i}`}
+                type="password"
+                inputMode="numeric"
+                maxLength={1}
+                value={d}
+                onChange={(e) => handleChange(e.target.value, i)}
+                className="w-9 h-11 rounded-xl bg-[#221d4a] border border-indigo-700/40 text-center text-lg font-black text-white font-['Nunito'] focus:outline-none focus:border-indigo-400 transition-all"
+              />
+            ))}
+          </div>
+
+          {error && (
+            <div className="px-2.5 py-1.5 bg-red-955/30 border border-red-800/40 rounded-lg flex items-center gap-2">
+              <AlertCircle size={12} className="text-red-400 flex-shrink-0" />
+              <span className="text-[9px] text-red-300 font-['Nunito'] leading-tight">{error}</span>
+            </div>
+          )}
+
+          <div className="flex flex-col gap-2">
+            <button 
+              onClick={handleVerify} 
+              className="w-full py-2.5 rounded-xl font-['Nunito'] font-black text-xs bg-gradient-to-r from-indigo-600 to-purple-700 text-white shadow-[0_2px_12px_rgba(99,102,241,0.4)] transition-all active:scale-95 flex items-center justify-center gap-1.5"
+            >
+              <Shield size={14} /> Verify & Enter
+            </button>
+            <button 
+              onClick={() => onNavigate("login")} 
+              className="font-['Nunito'] text-[10px] text-purple-500 hover:text-purple-300 transition-colors text-center mt-1"
+            >
+              ← Back to Login
+            </button>
           </div>
         </div>
 
-        {error && (
-          <div className="w-full px-3 py-2 bg-red-950/40 border border-red-800/50 rounded-lg flex items-center gap-2">
-            <AlertCircle size={14} className="text-red-400 flex-shrink-0" />
-            <span className="text-[10px] text-red-300 font-['Nunito']">{error}</span>
-          </div>
-        )}
-
-        <div className="flex gap-2">
-          {pin.map((d, i) => (
-            <input
-              key={i}
-              id={`pin-${i}`}
-              type="password"
-              inputMode="numeric"
-              maxLength={1}
-              value={d}
-              onChange={(e) => handleChange(e.target.value, i)}
-              className="w-11 h-14 rounded-xl bg-[#221d4a] border-2 border-indigo-700/40 text-center text-xl font-black text-white font-['Nunito'] focus:outline-none focus:border-indigo-400 transition-all"
-            />
-          ))}
-        </div>
-
-        <button onClick={handleVerify} className="w-full py-4 rounded-xl font-['Nunito'] font-black text-base bg-gradient-to-r from-indigo-600 to-purple-700 text-white shadow-[0_4px_24px_rgba(99,102,241,0.4)] transition-all active:scale-95 flex items-center justify-center gap-2">
-          <Shield size={18} /> Verify & Enter
-        </button>
-        <button onClick={() => onNavigate("login")} className="font-['Nunito'] text-sm text-purple-600 hover:text-purple-400 transition-colors">← Back to Login</button>
       </div>
     </div>
   );
@@ -2152,173 +2236,193 @@ function TeacherCardsScreen({ onNavigate, catalog, setCatalog }: TeacherCardsPro
   };
 
   return (
-    <div className="flex flex-col min-h-full bg-[#0d0b1e] overflow-y-auto pb-10" style={{ scrollbarWidth: "none" }}>
-      <div className="flex items-center gap-3 px-5 pt-6 pb-4">
-        <div className="w-9 h-9 rounded-lg bg-indigo-800 flex items-center justify-center border border-indigo-600/40">
-          <Shield size={16} className="text-indigo-300" />
+    <div className="flex flex-col h-full bg-[#0d0b1e] overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center gap-3 px-5 pt-3 pb-2 flex-shrink-0 border-b border-purple-900/20 bg-black/10">
+        <div className="w-7 h-7 rounded-lg bg-indigo-800 flex items-center justify-center border border-indigo-600/40">
+          <Shield size={14} className="text-indigo-300" />
         </div>
         <div className="flex-1">
-          <h2 className="font-['Nunito'] font-black text-white text-base leading-none">Catalog CMS</h2>
-          <p className="font-['Nunito'] text-[10px] text-purple-400">Add & modify vocabulary cards</p>
+          <h2 className="font-['Nunito'] text-sm font-black text-white leading-none">Catalog CMS</h2>
+          <p className="font-['Nunito'] text-[8px] text-purple-400 mt-0.5 uppercase tracking-wider font-bold">Add & modify vocabulary cards</p>
         </div>
-        <button onClick={() => onNavigate("teacher-progress")} className="text-xs font-['Nunito'] font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition-colors">
-          Stats <ArrowRight size={12} />
-        </button>
-      </div>
-
-      {/* Offline Banner alerts */}
-      {alertSync && (
-        <div className="mx-5 mb-3 rounded-xl bg-emerald-950/40 border border-emerald-600/60 px-4 py-2.5 flex items-center gap-2.5 animate-scale-up">
-          <CheckCircle size={15} className="text-emerald-400 flex-shrink-0" />
-          <div className="flex-1">
-            <p className="font-['Nunito'] font-bold text-emerald-300 text-[10px] leading-tight">Card catalog updated locally!</p>
-            <p className="font-['Nunito'] text-[9px] text-emerald-500 mt-0.5 leading-none">Auto-sync with school server will restore on connection.</p>
-          </div>
-        </div>
-      )}
-
-      {isFormInvalid && (
-        <div className="mx-5 mb-3 rounded-xl bg-red-900/30 border border-red-600/60 px-4 py-3 flex items-center gap-2.5 animate-shake">
-          <AlertCircle size={16} className="text-red-400 flex-shrink-0" />
-          <div>
-            <p className="font-['Nunito'] font-black text-red-300 text-xs">Missing mandatory fields</p>
-            <p className="font-['Nunito'] text-[9px] text-red-600 mt-0.5 leading-tight">Please fix errors: Card Name must have at least 2 words, Power must be 1-9, and audio must be uploaded.</p>
-          </div>
-        </div>
-      )}
-
-      {/* CMS Entry / Edit Form */}
-      <div className="mx-5 mb-6 rounded-2xl bg-[#1a1540] border border-purple-700/30 p-4 flex flex-col gap-3.5 shadow-md">
-        <h3 className="font-['Nunito'] font-black text-white text-xs uppercase tracking-wider">{editingCard ? `✏️ Edit Card: ${editingCard.name}` : "➕ Add New Card"}</h3>
         
-        <div className="flex flex-col gap-1">
-          <label className="text-[9px] font-['Nunito'] font-black text-purple-300 uppercase tracking-wider">Card Name (English Term) *</label>
-          <input
-            type="text"
-            value={cardName}
-            onChange={(e) => setCardName(e.target.value)}
-            placeholder="e.g. Verbose Dragon (2 words minimum)"
-            className={`w-full bg-[#221d4a] border rounded-xl px-4 py-2 text-white font-['Nunito'] text-xs focus:outline-none transition-all ${isNameInvalid ? "border-red-600/70" : "border-purple-700/40 focus:border-purple-500"}`}
-          />
-        </div>
-
-        <div className="flex gap-2">
-          <div className="flex-1 flex flex-col gap-1">
-            <label className="text-[9px] font-['Nunito'] font-black text-purple-300 uppercase tracking-wider">Card Type</label>
-            <select value={type} onChange={(e) => setType(e.target.value as CardType)} className="w-full bg-[#221d4a] border border-purple-700/40 rounded-xl px-3 py-2 text-white font-['Nunito'] text-xs focus:outline-none cursor-pointer">
-              {["Creature", "Item", "Effect", "Value"].map(t => <option key={t} value={t}>{t}</option>)}
-            </select>
+        <div className="flex items-center gap-3">
+          <button onClick={() => onNavigate("teacher-progress")} className="text-[10px] font-['Nunito'] font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition-colors">
+            Stats <ArrowRight size={10} />
+          </button>
+          
+          <div className="bg-indigo-950/60 border border-indigo-800/40 rounded-lg px-2 py-0.5 flex items-center gap-1.5 shadow-sm">
+            <span className="text-[9px]">👤</span>
+            <span className="font-['Nunito'] text-[8px] font-black text-indigo-300 uppercase tracking-wider">Admin (Class 5B)</span>
           </div>
-          <div className="flex-1 flex flex-col gap-1">
-            <label className="text-[9px] font-['Nunito'] font-black text-purple-300 uppercase tracking-wider">Rarity</label>
-            <select value={rarity} onChange={(e) => setRarity(e.target.value as Rarity)} className="w-full bg-[#221d4a] border border-purple-700/40 rounded-xl px-3 py-2 text-white font-['Nunito'] text-xs focus:outline-none cursor-pointer">
-              {["Common", "Rare", "Epic", "Legendary"].map(r => <option key={r} value={r}>{r}</option>)}
-            </select>
-          </div>
-        </div>
-
-        <div className="flex gap-2">
-          <div className="flex-1 flex flex-col gap-1">
-            <label className="text-[9px] font-['Nunito'] font-black text-purple-300 uppercase tracking-wider">Grammar Class</label>
-            <select value={cls} onChange={(e) => setCls(e.target.value)} className="w-full bg-[#221d4a] border border-purple-700/40 rounded-xl px-3 py-2 text-white font-['Nunito'] text-xs focus:outline-none cursor-pointer">
-              {["Noun", "Verb", "Adjective", "Adverb", "Prefix", "Suffix", "Grammar", "Figurative"].map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-          </div>
-          <div className="flex-1 flex flex-col gap-1">
-            <label className="text-[9px] font-['Nunito'] font-black text-purple-300 uppercase tracking-wider">Power (1-9) *</label>
-            <input
-              type="number"
-              min={1}
-              max={9}
-              value={power}
-              onChange={(e) => setPower(e.target.value)}
-              placeholder="e.g. 5"
-              className={`w-full bg-[#221d4a] border rounded-xl px-3 py-1.5 text-white font-['DM_Mono'] text-xs focus:outline-none transition-all ${isPowerInvalid ? "border-red-600/70" : "border-purple-700/40 focus:border-purple-500"}`}
-            />
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label className="text-[9px] font-['Nunito'] font-black text-purple-300 uppercase tracking-wider">Ability Text (Optional)</label>
-          <input
-            type="text"
-            value={ability}
-            onChange={(e) => setAbility(e.target.value)}
-            placeholder="e.g. Doubles next power card"
-            className="w-full bg-[#221d4a] border border-purple-700/40 rounded-xl px-4 py-2 text-white font-['Nunito'] text-xs focus:outline-none focus:border-purple-500"
-          />
-        </div>
-
-        {/* Audio mock upload */}
-        <div className="flex flex-col gap-1">
-          <label className="text-[9px] font-['Nunito'] font-black text-purple-300 uppercase tracking-wider">Audio Pronunciation *</label>
-          <label className={`flex items-center gap-3 rounded-xl border border-dashed px-3 py-3.5 cursor-pointer transition-all ${audio ? "border-emerald-600/50 bg-emerald-950/10" : isAudioMissing ? "border-red-600/60 bg-red-950/10" : "border-purple-700/40 bg-[#221d4a] hover:border-purple-500/55"}`}>
-            <input type="file" accept="audio/*" className="hidden" onChange={(e) => setAudio(e.target.files?.[0]?.name ?? "audio_reference.mp3")} />
-            {audio ? (
-              <>
-                <Volume2 size={16} className="text-emerald-400 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="font-['Nunito'] font-bold text-emerald-300 text-[10px] truncate leading-none">{audio}</p>
-                  <p className="font-['Nunito'] text-[8px] text-emerald-500 mt-1 leading-none">Pronunciation attached</p>
-                </div>
-                <CheckCircle size={14} className="text-emerald-400" />
-              </>
-            ) : (
-              <>
-                <Upload size={16} className="text-purple-500 flex-shrink-0" />
-                <div>
-                  <p className="font-['Nunito'] font-bold text-purple-300 text-[10px] leading-none">Upload Audio File</p>
-                  <p className="font-['Nunito'] text-[8px] text-purple-600 mt-0.5 leading-none">MP3, WAV, or OGG references</p>
-                </div>
-              </>
-            )}
-          </label>
-        </div>
-
-        <div className="flex gap-2">
-          {editingCard && (
-            <button onClick={() => { setEditingCard(null); setCardName(""); setAudio(null); setSubmitted(false); }} className="flex-1 py-2.5 rounded-xl border border-purple-800 text-purple-400 text-xs font-black transition-all">Cancel</button>
-          )}
-          <button onClick={handleSaveCard} className="flex-2 py-2.5 bg-indigo-600 text-white rounded-xl font-['Nunito'] font-black text-xs active:scale-95 transition-all shadow-[0_3px_12px_rgba(79,70,229,0.4)]">
-            {editingCard ? "Update Card Specs" : "Save to Local Catalog"}
+          
+          <button 
+            onClick={() => onNavigate("login")} 
+            className="px-2.5 py-1 bg-red-955 hover:bg-red-900 border border-red-900/40 text-red-400 hover:text-red-300 rounded-lg text-[9px] font-bold transition-all active:scale-95 cursor-pointer shadow-sm"
+          >
+            Log Out
           </button>
         </div>
       </div>
 
-      {/* Catalog listing */}
-      <div className="px-5">
-        <h3 className="font-['Nunito'] font-black text-white text-xs uppercase tracking-wider mb-2">Registered Catalog ({catalog.length} Cards)</h3>
-        <div className="flex flex-col gap-2">
-          {catalog.map((c) => (
-            <div key={c.id} className={`flex items-center justify-between p-3 rounded-xl bg-[#1a1540]/60 border ${c.active !== false ? "border-purple-900/50" : "border-red-950/40 opacity-50"}`}>
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-800 to-purple-950 flex items-center justify-center">
-                  {TYPE_ICON_SM[c.type]}
-                </div>
-                <div>
-                  <h4 className="font-['Nunito'] font-bold text-xs text-white leading-tight">{c.name}</h4>
-                  <p className="font-['DM_Mono'] text-[8px] text-purple-500 mt-0.5 uppercase tracking-wide">
-                    {c.englishClass} · {c.rarity} · Power {c.power}
-                  </p>
-                </div>
-              </div>
+      {/* Main Split Content */}
+      <div className="flex-1 flex flex-row p-4 gap-4 overflow-hidden min-h-0">
+        
+        {/* Left Column: Form (Scrollable internally) */}
+        <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-3 rounded-2xl bg-[#1a1540]/30 border border-purple-700/20 p-4" style={{ scrollbarWidth: "none" }}>
+          <h3 className="font-['Nunito'] font-black text-white text-[10px] uppercase tracking-wider">
+            {editingCard ? `✏️ Edit Card: ${editingCard.name}` : "➕ Add New Card"}
+          </h3>
 
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => toggleActive(c.id)}
-                  className={`text-[9px] px-2 py-1 rounded font-bold transition-all ${c.active !== false ? "bg-emerald-950 text-emerald-400 border border-emerald-800/40" : "bg-red-950 text-red-400 border border-red-800/40"}`}
-                >
-                  {c.active !== false ? "Active" : "Disabled"}
-                </button>
-                <button
-                  onClick={() => startEdit(c)}
-                  className="text-[9px] bg-indigo-950 text-indigo-400 border border-indigo-800/40 px-2 py-1 rounded font-bold hover:bg-indigo-900"
-                >
-                  Edit
-                </button>
+          {/* Offline Banner alerts */}
+          {alertSync && (
+            <div className="rounded-xl bg-emerald-950/40 border border-emerald-600/60 px-3 py-2 flex items-center gap-2 animate-scale-up">
+              <CheckCircle size={13} className="text-emerald-400 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="font-['Nunito'] font-bold text-emerald-300 text-[9px] leading-tight">Card catalog updated locally!</p>
               </div>
             </div>
-          ))}
+          )}
+
+          {isFormInvalid && (
+            <div className="rounded-xl bg-red-900/30 border border-red-600/60 px-3 py-2 flex items-center gap-2 animate-shake">
+              <AlertCircle size={13} className="text-red-400 flex-shrink-0" />
+              <div>
+                <p className="font-['Nunito'] font-black text-red-300 text-[9px] leading-tight">Missing fields</p>
+              </div>
+            </div>
+          )}
+          
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[8px] font-['Nunito'] font-black text-purple-300 uppercase tracking-wider">Card Name *</label>
+            <input
+              type="text"
+              value={cardName}
+              onChange={(e) => setCardName(e.target.value)}
+              placeholder="e.g. Verbose Dragon (2 words min)"
+              className={`w-full bg-[#221d4a] border rounded-xl px-3 py-1.5 text-white font-['Nunito'] text-xs focus:outline-none transition-all ${isNameInvalid ? "border-red-600/70" : "border-purple-700/40 focus:border-purple-500"}`}
+            />
+          </div>
+
+          <div className="flex gap-2">
+            <div className="flex-1 flex flex-col gap-1">
+              <label className="text-[8px] font-['Nunito'] font-black text-purple-300 uppercase tracking-wider">Card Type</label>
+              <select value={type} onChange={(e) => setType(e.target.value as CardType)} className="w-full bg-[#221d4a] border border-purple-700/40 rounded-xl px-2 py-1 text-white font-['Nunito'] text-[10px] focus:outline-none cursor-pointer">
+                {["Creature", "Item", "Effect", "Value"].map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </div>
+            <div className="flex-1 flex flex-col gap-1">
+              <label className="text-[8px] font-['Nunito'] font-black text-purple-300 uppercase tracking-wider">Rarity</label>
+              <select value={rarity} onChange={(e) => setRarity(e.target.value as Rarity)} className="w-full bg-[#221d4a] border border-purple-700/40 rounded-xl px-2 py-1 text-white font-['Nunito'] text-[10px] focus:outline-none cursor-pointer">
+                {["Common", "Rare", "Epic", "Legendary"].map(r => <option key={r} value={r}>{r}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            <div className="flex-1 flex flex-col gap-1">
+              <label className="text-[8px] font-['Nunito'] font-black text-purple-300 uppercase tracking-wider">Grammar Class</label>
+              <select value={cls} onChange={(e) => setCls(e.target.value)} className="w-full bg-[#221d4a] border border-purple-700/40 rounded-xl px-2 py-1 text-white font-['Nunito'] text-[10px] focus:outline-none cursor-pointer">
+                {["Noun", "Verb", "Adjective", "Adverb", "Prefix", "Suffix", "Grammar", "Figurative"].map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div className="flex-1 flex flex-col gap-1">
+              <label className="text-[8px] font-['Nunito'] font-black text-purple-300 uppercase tracking-wider">Power (1-9) *</label>
+              <input
+                type="number"
+                min={1}
+                max={9}
+                value={power}
+                onChange={(e) => setPower(e.target.value)}
+                placeholder="e.g. 5"
+                className={`w-full bg-[#221d4a] border rounded-xl px-2.5 py-1 text-white font-['DM_Mono'] text-xs focus:outline-none transition-all ${isPowerInvalid ? "border-red-600/70" : "border-purple-700/40 focus:border-purple-500"}`}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-[8px] font-['Nunito'] font-black text-purple-300 uppercase tracking-wider">Ability (Optional)</label>
+            <input
+              type="text"
+              value={ability}
+              onChange={(e) => setAbility(e.target.value)}
+              placeholder="e.g. Doubles next power"
+              className="w-full bg-[#221d4a] border border-purple-700/40 rounded-xl px-3 py-1.5 text-white font-['Nunito'] text-xs focus:outline-none focus:border-purple-500"
+            />
+          </div>
+
+          {/* Audio mock upload */}
+          <div className="flex flex-col gap-1">
+            <label className="text-[8px] font-['Nunito'] font-black text-purple-300 uppercase tracking-wider">Audio Pronunciation *</label>
+            <label className={`flex items-center gap-2 rounded-xl border border-dashed px-3 py-2 cursor-pointer transition-all ${audio ? "border-emerald-600/50 bg-emerald-950/10" : isAudioMissing ? "border-red-600/60 bg-red-955/10" : "border-purple-700/40 bg-[#221d4a] hover:border-purple-500/55"}`}>
+              <input type="file" accept="audio/*" className="hidden" onChange={(e) => setAudio(e.target.files?.[0]?.name ?? "audio_ref.mp3")} />
+              {audio ? (
+                <>
+                  <Volume2 size={12} className="text-emerald-400 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-['Nunito'] font-bold text-emerald-300 text-[9px] truncate leading-none">{audio}</p>
+                  </div>
+                  <CheckCircle size={11} className="text-emerald-400" />
+                </>
+              ) : (
+                <>
+                  <Upload size={12} className="text-purple-500 flex-shrink-0" />
+                  <div>
+                    <p className="font-['Nunito'] font-bold text-purple-300 text-[9px] leading-none">Upload Audio</p>
+                  </div>
+                </>
+              )}
+            </label>
+          </div>
+
+          <div className="flex gap-2 mt-auto">
+            {editingCard && (
+              <button onClick={() => { setEditingCard(null); setCardName(""); setAudio(null); setSubmitted(false); }} className="flex-1 py-1.5 rounded-xl border border-purple-800 text-purple-400 text-[10px] font-black transition-all">Cancel</button>
+            )}
+            <button onClick={handleSaveCard} className="flex-2 py-1.5 bg-indigo-600 text-white rounded-xl font-['Nunito'] font-black text-[10px] active:scale-95 transition-all shadow-md">
+              {editingCard ? "Update specs" : "Save Card"}
+            </button>
+          </div>
+        </div>
+
+        {/* Right Column: Listing (Scrollable internally) */}
+        <div className="flex-1 overflow-y-auto flex flex-col gap-2 pr-1" style={{ scrollbarWidth: "none" }}>
+          <h3 className="font-['Nunito'] font-black text-white text-[10px] uppercase tracking-wider sticky top-0 bg-[#0d0b1e] py-1 z-10">
+            Registered Catalog ({catalog.length} Cards)
+          </h3>
+          <div className="flex flex-col gap-1.5">
+            {catalog.map((c) => (
+              <div key={c.id} className={`flex items-center justify-between p-2 rounded-xl bg-[#1a1540]/60 border ${c.active !== false ? "border-purple-900/50" : "border-red-955/40 opacity-50"} text-[10px]`}>
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-indigo-800 to-purple-955 flex items-center justify-center flex-shrink-0">
+                    {TYPE_ICON_SM[c.type]}
+                  </div>
+                  <div className="min-w-0">
+                    <h4 className="font-['Nunito'] font-bold text-white leading-tight truncate max-w-[120px]">{c.name}</h4>
+                    <p className="font-['DM_Mono'] text-[7px] text-purple-500 mt-0.5 uppercase tracking-wide">
+                      {c.englishClass} · {c.rarity} · Pw {c.power}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => toggleActive(c.id)}
+                    className={`text-[8px] px-1.5 py-0.5 rounded font-bold transition-all ${c.active !== false ? "bg-emerald-955 text-emerald-400 border border-emerald-800/40" : "bg-red-955 text-red-400 border border-red-800/40"}`}
+                  >
+                    {c.active !== false ? "Active" : "Off"}
+                  </button>
+                  <button
+                    onClick={() => startEdit(c)}
+                    className="text-[8px] bg-indigo-955 text-indigo-400 border border-indigo-800/40 px-1.5 py-0.5 rounded font-bold hover:bg-indigo-900"
+                  >
+                    Edit
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -2372,8 +2476,8 @@ function TeacherProgressScreen({ onNavigate, history, codes, setCodes }: Teacher
   };
 
   return (
-    <div className="flex flex-col min-h-full bg-[#0d0b1e] overflow-y-auto pb-10" style={{ scrollbarWidth: "none" }}>
-      <div className="flex items-center gap-3 px-5 pt-6 pb-4">
+    <div className="flex flex-col h-full bg-[#0d0b1e] overflow-hidden">
+      <div className="flex items-center gap-3 px-5 pt-4 pb-2 flex-shrink-0">
         <div className="w-9 h-9 rounded-lg bg-indigo-800 flex items-center justify-center border border-indigo-600/40">
           <BarChart2 size={16} className="text-indigo-300" />
         </div>
@@ -2381,13 +2485,28 @@ function TeacherProgressScreen({ onNavigate, history, codes, setCodes }: Teacher
           <h2 className="font-['Nunito'] font-black text-white text-base leading-none">Classroom Progress</h2>
           <p className="font-['Nunito'] text-[10px] text-purple-400">Class 5B — English Vocabulary Tracker</p>
         </div>
-        <button onClick={() => onNavigate("teacher-cards")} className="text-xs font-['Nunito'] font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition-colors">
-          <ChevronLeft size={14} /> Catalog
-        </button>
+        
+        <div className="flex items-center gap-3">
+          <button onClick={() => onNavigate("teacher-cards")} className="text-xs font-['Nunito'] font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition-colors">
+            <ChevronLeft size={14} /> Catalog
+          </button>
+          
+          <div className="bg-indigo-950/60 border border-indigo-800/40 rounded-lg px-2 py-0.5 flex items-center gap-1.5 shadow-sm">
+            <span className="text-[9px]">👤</span>
+            <span className="font-['Nunito'] text-[8px] font-black text-indigo-300 uppercase tracking-wider">Admin (Class 5B)</span>
+          </div>
+          
+          <button 
+            onClick={() => onNavigate("login")} 
+            className="px-2.5 py-1 bg-red-955 hover:bg-red-900 border border-red-900/40 text-red-400 hover:text-red-300 rounded-lg text-[9px] font-bold transition-all active:scale-95 cursor-pointer shadow-sm"
+          >
+            Log Out
+          </button>
+        </div>
       </div>
 
       {/* Toggle View Options */}
-      <div className="mx-5 mb-4 rounded-xl bg-[#1a1540] p-1 border border-purple-700/30 flex">
+      <div className="mx-5 mb-3 rounded-xl bg-[#1a1540] p-1 border border-purple-700/30 flex flex-shrink-0">
         <button onClick={() => setShowRewards(false)} className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${!showRewards ? "bg-indigo-600 text-white" : "text-purple-400 hover:text-white"}`}>
           📊 Student Stats
         </button>
@@ -2396,7 +2515,8 @@ function TeacherProgressScreen({ onNavigate, history, codes, setCodes }: Teacher
         </button>
       </div>
 
-      {!showRewards ? (
+      <div className="flex-1 overflow-y-auto pb-6" style={{ scrollbarWidth: "none" }}>
+        {!showRewards ? (
         // 📊 Student Stats Dashboard
         <div className="flex flex-col gap-4">
           <div className="mx-5 grid grid-cols-3 gap-2">
@@ -2530,6 +2650,7 @@ function TeacherProgressScreen({ onNavigate, history, codes, setCodes }: Teacher
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
@@ -2556,11 +2677,13 @@ export default function App() {
 
   const [screen, setScreen] = useState<Screen>("login");
   const [userRole, setUserRole] = useState<"student" | "teacher" | null>(null);
+  const [isTeacherVerified, setIsTeacherVerified] = useState(false);
 
   const navigate = (s: Screen) => {
     setScreen(s);
     if (s === "login") {
       setUserRole(null);
+      setIsTeacherVerified(false);
     } else if (s === "student-hub" || s === "deck-builder" || s === "game-mat") {
       setUserRole("student");
     } else if (s === "teacher-verify" || s === "teacher-cards" || s === "teacher-progress") {
@@ -2576,7 +2699,15 @@ export default function App() {
       if (parsed.length < 100) { // Migrate old 30-card catalog
         return defaultCatalog;
       }
-      return parsed;
+      // Migrate card names and properties to ensure they match defaultCatalog updates!
+      const migrated = parsed.map((card: Card) => {
+        const matching = defaultCatalog.find(c => c.id === card.id);
+        if (matching && (matching.name !== card.name || matching.englishClass !== card.englishClass || matching.type !== card.type || matching.ability !== card.ability)) {
+          return { ...card, name: matching.name, englishClass: matching.englishClass, type: matching.type, ability: matching.ability };
+        }
+        return card;
+      });
+      return migrated;
     }
     return defaultCatalog;
   });
@@ -2633,7 +2764,7 @@ export default function App() {
     if (!studentProfile) {
       studentProfile = {
         username: username,
-        coins: 100,
+        coins: 0,
         trophies: 0,
         wins: 0,
         losses: 0,
@@ -2707,6 +2838,20 @@ export default function App() {
       );
     }
 
+    // Prevent unverified teachers from accessing teacher content (CMS/Stats)
+    if (userRole === "teacher" && !isTeacherVerified && (screen === "teacher-cards" || screen === "teacher-progress")) {
+      return (
+        <TeacherVerifyScreen
+          onNavigate={(targetScreen) => {
+            if (targetScreen === "teacher-cards") {
+              setIsTeacherVerified(true);
+            }
+            navigate(targetScreen);
+          }}
+        />
+      );
+    }
+
     switch (screen) {
       case "login":
         return <LoginScreen onNavigate={navigate} onStudentLogin={handleStudentLogin} />;
@@ -2745,7 +2890,16 @@ export default function App() {
           />
         );
       case "teacher-verify":
-        return <TeacherVerifyScreen onNavigate={navigate} />;
+        return (
+          <TeacherVerifyScreen
+            onNavigate={(targetScreen) => {
+              if (targetScreen === "teacher-cards") {
+                setIsTeacherVerified(true);
+              }
+              navigate(targetScreen);
+            }}
+          />
+        );
       case "teacher-cards":
         return (
           <TeacherCardsScreen
@@ -2820,7 +2974,7 @@ export default function App() {
                 <p className="text-[10px] text-purple-400 mt-1 uppercase tracking-widest font-black">{zoomedCard.type} · {zoomedCard.rarity}</p>
                 <div className="bg-[#1c1845] border border-purple-900/40 rounded-xl p-2.5 mt-3 text-left">
                   <p className="text-[9px] text-purple-200 italic leading-relaxed">
-                    {zoomedCard.ability || "Esta carta representa una palabra de vocabulario en inglés. ¡Mantén presionada la carta para escuchar su pronunciación!"}
+                    {zoomedCard.ability || "This card represents an English vocabulary word. Hold the card to hear its correct pronunciation!"}
                   </p>
                 </div>
               </div>
@@ -2829,7 +2983,7 @@ export default function App() {
                 onClick={() => speakWord(zoomedCard.name)}
                 className="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-['Nunito'] font-black text-xs hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-1.5"
               >
-                <Volume2 size={13} /> Escuchar Vocabulario
+                <Volume2 size={13} /> Listen to Vocabulary
               </button>
             </div>
           </div>
@@ -2842,35 +2996,50 @@ export default function App() {
           </div>
         )}
         {/* Navigation tabs for presentation/grading */}
-        <div className="px-3 pb-1.5 flex-shrink-0 z-50 select-none">
-          <div className="flex gap-1 bg-black/30 backdrop-blur rounded-xl p-1 border border-purple-900/30">
-            {NAV.filter(group => {
-              if (userRole === "student" && group.label === "Teacher") {
-                return false;
-              }
-              return true;
-            }).map((group) =>
-              group.screens.map((s) => (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={() => navigate(s.id)}
-                  className={`flex-1 py-1.5 rounded-lg text-[9px] font-['Nunito'] font-bold transition-all ${
-                    screen === s.id
-                      ? group.label === "Teacher"
-                        ? "bg-indigo-600 text-white shadow-[0_2px_8px_rgba(99,102,241,0.5)]"
-                        : "bg-purple-600 text-white shadow-[0_2px_8px_rgba(124,58,237,0.5)]"
-                      : group.label === "Teacher"
-                      ? "text-indigo-700 hover:text-indigo-400"
-                      : "text-purple-700 hover:text-purple-400"
-                  }`}
-                >
-                  {s.label}
-                </button>
-              ))
-            )}
+        {screen !== "login" && (
+          <div className="px-3 pb-1.5 flex-shrink-0 z-50 select-none">
+            <div className="flex gap-1 bg-black/30 backdrop-blur rounded-xl p-1 border border-purple-900/30">
+              {NAV.filter(group => {
+                if (group.label === "") {
+                  return false;
+                }
+                if (userRole === "student" && group.label === "Teacher") {
+                  return false;
+                }
+                if (userRole === "teacher" && group.label === "Student") {
+                  return false;
+                }
+                return true;
+              }).map((group) =>
+                group.screens
+                  .filter((s) => {
+                    if (s.id === "teacher-verify" && isTeacherVerified) {
+                      return false;
+                    }
+                    return true;
+                  })
+                  .map((s) => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => navigate(s.id)}
+                      className={`flex-1 py-1.5 rounded-lg text-[9px] font-['Nunito'] font-bold transition-all ${
+                        screen === s.id
+                          ? group.label === "Teacher"
+                            ? "bg-indigo-600 text-white shadow-[0_2px_8px_rgba(99,102,241,0.5)]"
+                            : "bg-purple-600 text-white shadow-[0_2px_8px_rgba(124,58,237,0.5)]"
+                          : group.label === "Teacher"
+                          ? "text-indigo-700 hover:text-indigo-400"
+                          : "text-purple-700 hover:text-purple-400"
+                      }`}
+                    >
+                      {s.label}
+                    </button>
+                  ))
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Screen content */}
         <div className="flex-1 overflow-hidden">{renderScreen()}</div>
