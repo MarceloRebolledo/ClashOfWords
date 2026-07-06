@@ -389,11 +389,13 @@ function HandCard({ card, onPlay, onSpeech, onZoom }: { card: Card; onPlay?: () 
   );
 }
 
-function CardBack({ count, label, color = "purple", onClick }: {
+function CardBack({ count, label, color = "purple", onClick, width = 72, height = 96 }: {
   count: number;
   label: string;
   color?: "purple" | "amber" | "slate" | "emerald";
   onClick?: () => void;
+  width?: number;
+  height?: number;
 }) {
   const colors = {
     purple: { border: "border-purple-600/60", bg: "from-purple-900/70 to-purple-950", glow: "shadow-[0_0_12px_rgba(124,58,237,0.35)]", text: "text-purple-300", badge: "bg-purple-700 text-purple-200" },
@@ -402,6 +404,8 @@ function CardBack({ count, label, color = "purple", onClick }: {
     emerald: { border: "border-emerald-600/50", bg: "from-emerald-900/60 to-emerald-950", glow: "shadow-[0_0_10px_rgba(16,185,129,0.3)]", text: "text-emerald-300", badge: "bg-emerald-800 text-emerald-200" },
   }[color];
 
+  const isSmall = height < 75;
+
   return (
     <div
       role={onClick ? "button" : undefined}
@@ -409,13 +413,13 @@ function CardBack({ count, label, color = "purple", onClick }: {
       onClick={onClick}
       onKeyDown={onClick ? (e) => e.key === "Enter" && onClick() : undefined}
       className={`flex flex-col items-center justify-between rounded-xl border-2 bg-gradient-to-b ${colors.bg} ${colors.border} ${colors.glow} ${onClick ? "cursor-pointer active:scale-95 hover:brightness-110" : ""} transition-all relative overflow-hidden`}
-      style={{ width: 72, height: 96 }}
+      style={{ width, height }}
     >
       <img src="/cards/CARD BACK/carta_001.png" alt="Card Back" className="w-full h-full object-cover absolute inset-0" />
-      <div className="absolute inset-0 bg-black/45 flex flex-col items-center justify-between py-2 z-10">
-        <span className="font-['Nunito'] font-black text-2xl text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{count}</span>
-        <div className="w-full px-1.5 py-0.5 text-center bg-black/60 rounded-b-lg">
-          <span className="font-['Nunito'] font-bold text-[8px] uppercase tracking-wider text-white">{label}</span>
+      <div className={`absolute inset-0 bg-black/45 flex flex-col items-center justify-between ${isSmall ? "py-1" : "py-2"} z-10`}>
+        <span className={`font-['Nunito'] font-black ${isSmall ? "text-sm" : "text-2xl"} text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]`}>{count}</span>
+        <div className="w-full px-1 py-0.5 text-center bg-black/60 rounded-b-lg">
+          <span className={`font-['Nunito'] font-bold ${isSmall ? "text-[6px]" : "text-[8px]"} uppercase tracking-wider text-white line-clamp-1`}>{label}</span>
         </div>
       </div>
     </div>
@@ -707,7 +711,7 @@ function StudentHubScreen({ onNavigate, profile, setProfile, codes, setCodes, ca
     };
 
     const drawn: Card[] = [];
-    // Draw 12 creatures, 5 items, 5 effects
+    // Draw 12 creatures, 5 items, 5 effects, and 1 Value card (Initial Effect)
     for (let i = 0; i < 12; i++) {
       drawn.push(drawCard("Creature"));
     }
@@ -717,12 +721,20 @@ function StudentHubScreen({ onNavigate, profile, setProfile, codes, setCodes, ca
     for (let i = 0; i < 5; i++) {
       drawn.push(drawCard("Effect"));
     }
+    drawn.push(drawCard("Value"));
+
+    // Ensure the automatically activated deck has exactly 20 cards including the Value card
+    const creatureIds = drawn.filter(c => c.type === "Creature").slice(0, 14).map(c => c.id);
+    const itemIds = drawn.filter(c => c.type === "Item").slice(0, 3).map(c => c.id);
+    const effectIds = drawn.filter(c => c.type === "Effect").slice(0, 2).map(c => c.id);
+    const valueIds = drawn.filter(c => c.type === "Value").map(c => c.id);
+    const initialActiveDeck = [...creatureIds, ...itemIds, ...effectIds, ...valueIds];
 
     setProfile(prev => ({
       ...prev,
       coins: prev.coins + 100,
       collection: drawn.map(c => c.id),
-      activeDeck: drawn.slice(0, 20).map(c => c.id) // Automatically activate first 20 cards
+      activeDeck: initialActiveDeck
     }));
 
     setClaimedLoot(drawn);
@@ -1257,7 +1269,11 @@ function DeckBuilderScreen({ onNavigate, profile, setProfile, catalog }: DeckBui
   const [previewCard, setPreviewCard] = useState<Card | null>(null);
 
   const activeCardsCount = selected.size;
-  const valid = activeCardsCount >= 20 && activeCardsCount <= 25;
+  const selectedCards = Array.from(selected).map(id => catalog.find(c => c.id === id)).filter((c): c is Card => !!c);
+  const valueCardsCount = selectedCards.filter(c => c.type === "Value").length;
+  const isSizeValid = activeCardsCount >= 20 && activeCardsCount <= 25;
+  const isValueValid = valueCardsCount === 1;
+  const valid = isSizeValid && isValueValid;
 
   const toggleCard = (id: string) => {
     setSelected(prev => {
@@ -1312,14 +1328,20 @@ function DeckBuilderScreen({ onNavigate, profile, setProfile, catalog }: DeckBui
       </div>
 
       {/* Validation Message */}
-      <div className={`mx-5 mb-2 rounded-xl px-4 py-1.5 flex items-center gap-2.5 border flex-shrink-0 ${valid ? "bg-emerald-900/30 border-emerald-700/50" : activeCardsCount < 20 ? "bg-amber-900/30 border-amber-700/50" : "bg-red-900/30 border-red-700/50"}`}>
+      <div className={`mx-5 mb-2 rounded-xl px-4 py-1.5 flex items-center gap-2.5 border flex-shrink-0 ${valid ? "bg-emerald-900/30 border-emerald-700/50" : (!isSizeValid || !isValueValid) ? "bg-amber-900/30 border-amber-700/50" : "bg-red-900/30 border-red-700/50"}`}>
         {valid ? <CheckCircle size={14} className="text-emerald-400 flex-shrink-0" /> : <AlertCircle size={14} className="text-amber-400 flex-shrink-0" />}
-        <div className="flex-1">
-          <p className={`font-['Nunito'] font-bold text-xs ${valid ? "text-emerald-300" : "text-amber-300"}`}>{activeCardsCount} / 25 cards selected</p>
-          <p className="font-['Nunito'] text-[8px] text-purple-400">Min 20–25 cards required to play</p>
+        <div className="flex-1 flex flex-row items-center justify-between">
+          <div>
+            <p className={`font-['Nunito'] font-bold text-xs ${valid ? "text-emerald-300" : "text-amber-300"}`}>{activeCardsCount} / 25 cards selected</p>
+            <p className="font-['Nunito'] text-[8px] text-purple-400">Min 20–25 cards required</p>
+          </div>
+          <div className="text-right pr-2">
+            <p className={`font-['Nunito'] font-bold text-[10px] ${isValueValid ? "text-emerald-400" : "text-amber-400"}`}>{valueCardsCount} / 1 Initial Effect (Value card)</p>
+            <p className="font-['Nunito'] text-[7px] text-purple-400">Exactly 1 required</p>
+          </div>
         </div>
-        <div className={`text-xs font-black font-['Nunito'] ${valid ? "text-emerald-400" : activeCardsCount < 20 ? "text-amber-400" : "text-red-400"}`}>
-          {valid ? "✓ Ready" : activeCardsCount < 20 ? `+${20 - activeCardsCount}` : "Max"}
+        <div className={`text-xs font-black font-['Nunito'] ${valid ? "text-emerald-400" : activeCardsCount < 20 ? "text-amber-400" : "text-red-400"} ml-2`}>
+          {valid ? "✓ Ready" : !isSizeValid ? (activeCardsCount < 20 ? `+${20 - activeCardsCount}` : "Too many") : "Needs 1 Value"}
         </div>
       </div>
 
@@ -1452,8 +1474,8 @@ function GameMatScreen({ onNavigate, profile, setProfile, catalog, setMatchHisto
   const [tutorialStep, setTutorialStep] = useState<number | null>(null);
 
   // Initial Value Effects (Core values permanently active)
-  const playerInitialValue: Card = { id: "p-iv", name: "Truth Seeker", type: "Value", rarity: "Legendary", power: 9, englishClass: "Value" };
-  const opponentInitialValue: Card = { id: "o-iv", name: "Honor Guard", type: "Value", rarity: "Epic", power: 7, englishClass: "Value" };
+  const [playerInitialValue, setPlayerInitialValue] = useState<Card | null>(null);
+  const [opponentInitialValue, setOpponentInitialValue] = useState<Card | null>(null);
 
   // Setup match
   const startNewMatch = () => {
@@ -1463,15 +1485,26 @@ function GameMatScreen({ onNavigate, profile, setProfile, catalog, setMatchHisto
     const pDeck = profile.activeDeck.map(id => catalog.find(c => c.id === id)).filter((c): c is Card => !!c);
     const shuffledP = [...pDeck].sort(() => Math.random() - 0.5);
 
-    // AI Opponent Deck Generator (20 cards)
+    // Extract Initial Effect Value card
+    const playerValCard = shuffledP.find(c => c.type === "Value") || catalog.find(c => c.type === "Value") || defaultCatalog[0];
+    const filteredShuffledP = shuffledP.filter(c => c.id !== playerValCard.id);
+    setPlayerInitialValue(playerValCard);
+
+    // AI Opponent Deck Generator (20 cards: 1 Value + 19 others)
     const activeCatalog = catalog.filter(c => c.active !== false);
+    const oValCards = activeCatalog.filter(c => c.type === "Value");
+    const opponentValCardObj = oValCards[Math.floor(Math.random() * oValCards.length)] || catalog.find(c => c.type === "Value") || defaultCatalog[0];
+    const opponentInitialValueCard = { ...opponentValCardObj, id: 'opp-val-card-' + Date.now() };
+    setOpponentInitialValue(opponentInitialValueCard);
+
     const oDeck = [];
-    for (let i = 0; i < 20; i++) {
-      const rand = activeCatalog[Math.floor(Math.random() * activeCatalog.length)] || defaultCatalog[0];
+    const activeNonValCatalog = activeCatalog.filter(c => c.type !== "Value");
+    for (let i = 0; i < 19; i++) {
+      const rand = activeNonValCatalog[Math.floor(Math.random() * activeNonValCatalog.length)] || defaultCatalog[0];
       oDeck.push({ ...rand, id: 'opp-card-' + i + '-' + Date.now() });
     }
 
-    setPlayerDeck(shuffledP);
+    setPlayerDeck(filteredShuffledP);
     setOpponentDeck(oDeck);
     setPlayerActive(null);
     setOpponentActive(null);
@@ -1631,10 +1664,12 @@ function GameMatScreen({ onNavigate, profile, setProfile, catalog, setMatchHisto
     let pPower = pCard.power;
     if (equippedItem) pPower += equippedItem.power;
     pPower += playerEffects.length * 2; // Each effect adds +2 power
+    if (playerInitialValue) pPower += playerInitialValue.power;
 
     let oPower = oCard.power;
     if (aiItemCard) oPower += aiItemCard.power;
     if (aiUsesEffect) oPower += 2; // +2 for effect
+    if (opponentInitialValue) oPower += opponentInitialValue.power;
 
     // Comparison calculations
     const rarityWeights = { Common: 1, Uncommon: 2, Rare: 3, Epic: 4, Legendary: 5 };
@@ -1651,21 +1686,23 @@ function GameMatScreen({ onNavigate, profile, setProfile, catalog, setMatchHisto
       turnWinner = "opponent";
       detailMsg = oCard.name + ' (' + oCard.rarity + ') defeats ' + pCard.name + ' (' + pCard.rarity + ') by Rarity!';
     } else {
-      // Rarity Tie! Compare Power (which includes item/effect buffs)
-      if (pPower > oPower) {
-        turnWinner = "player";
-        detailMsg = 'Rarity Tie (' + pCard.rarity + ')! ' + pCard.name + ' (' + pPower + ' Power) defeats ' + oCard.name + ' (' + oPower + ' Power) via Power boost!';
-      } else if (pPower < oPower) {
-        turnWinner = "opponent";
-        detailMsg = 'Rarity Tie (' + oCard.rarity + ')! ' + oCard.name + ' (' + oPower + ' Power) defeats ' + pCard.name + ' (' + pPower + ' Power) via Power boost!';
+      // Rarity Tie! Compare Class (Slide 8 rule)
+      if (pCard.englishClass === oCard.englishClass) {
+        // Same Class -> Automatic Tie
+        turnWinner = "tie";
+        detailMsg = 'Rarity Tie (' + pCard.rarity + ') & Same Class (' + pCard.englishClass + ')! Triggers Tie-Breaker!';
       } else {
-        // Power Tie! Compare Grammatical Class (Category)
-        if (pCard.englishClass === oCard.englishClass) {
-          turnWinner = "tie";
-          detailMsg = 'Total Tie! Same Rarity (' + pCard.rarity + '), Power (' + pPower + ') and Class (' + pCard.englishClass + ')! Triggers Tie-Breaker!';
+        // Different Class -> Compare Power
+        if (pPower > oPower) {
+          turnWinner = "player";
+          detailMsg = 'Rarity Tie (' + pCard.rarity + ') & Diff Class! ' + pCard.name + ' (' + pPower + ' Power) defeats ' + oCard.name + ' (' + oPower + ' Power) by Power!';
+        } else if (pPower < oPower) {
+          turnWinner = "opponent";
+          detailMsg = 'Rarity Tie (' + oCard.rarity + ') & Diff Class! ' + oCard.name + ' (' + oPower + ' Power) defeats ' + pCard.name + ' (' + pPower + ' Power) by Power!';
         } else {
+          // Same Power -> Tie
           turnWinner = "tie";
-          detailMsg = 'Tie! Same Rarity and Power. Triggers Tie-Breaker!';
+          detailMsg = 'Rarity Tie & Power Tie (' + pPower + ')! Triggers Tie-Breaker!';
         }
       }
     }
@@ -1840,57 +1877,186 @@ function GameMatScreen({ onNavigate, profile, setProfile, catalog, setMatchHisto
       </div>
 
       {/* Main landscape battlefield divided horizontally */}
-      <div className="flex-1 flex justify-between items-stretch px-4 py-1.5 gap-4 overflow-hidden relative z-20">
+      <div className="flex-1 flex flex-col justify-between items-center px-4 py-1 gap-1 overflow-hidden relative z-20">
         
-        {/* LEFT AREA: Initial permanent effect */}
-        <div className="w-24 flex flex-col justify-center items-center border border-dashed border-purple-900/30 rounded-xl bg-purple-950/10 p-1 h-[175px] self-center">
-          <span className="text-[7px] text-rose-500 font-bold uppercase tracking-wider mb-1">Initial Effect</span>
-          <div className="flex-1 flex flex-col items-center justify-center bg-rose-950/20 border border-rose-900/40 rounded-lg p-1 text-center w-full">
-            <span className="text-[9px] font-black text-white leading-tight">{playerInitialValue.name}</span>
-            <span className="text-[8px] font-bold text-rose-400 mt-1">+{playerInitialValue.power} Permanent</span>
+        {/* Clash Turn outcome text label */}
+        {clashResult && (
+          <div className="absolute top-[102px] left-3 z-45 text-center bg-[#150f35]/95 border border-purple-800/40 rounded-lg px-2.5 py-0.5 max-w-[280px] shadow-2xl">
+            <span className={`text-[8px] font-['Nunito'] font-bold leading-tight ${clashResult.winner === "player" ? "text-emerald-400" : clashResult.winner === "opponent" ? "text-rose-400" : "text-amber-400"}`}>
+              {clashResult.reason}
+            </span>
+          </div>
+        )}
+
+        {/* OPPONENT BOARD (Top Half) */}
+        <div className="w-full flex justify-center items-center gap-6 h-[115px] relative">
+          {/* Label indicating Opponent Side */}
+          <div className="absolute left-2 top-8 flex flex-col items-center opacity-60">
+            <span className="text-[6px] text-red-500 font-bold uppercase tracking-widest leading-none">Opponent Mat</span>
+          </div>
+
+          {/* Column 1: Discard Stack */}
+          <div className="w-[50px] flex flex-col items-center justify-center">
+            <span className="text-[5px] text-slate-500 font-black mb-0.5">DISCARD ({opponentDiscard.length})</span>
+            {opponentDiscard.length > 0 ? (
+              <CardBack count={opponentDiscard.length} label="Discard" color="slate" width={42} height={56} />
+            ) : (
+              <EmptySlot label="Discard" width={42} height={56} />
+            )}
+          </div>
+
+          {/* Column 2: Trophy Stack, Deck, Initial Effect (Overlapping Stack) */}
+          <div className="w-[120px] h-[86px] relative flex flex-col items-center justify-center">
+            {/* Trophy Stack (Top) */}
+            <div className="absolute top-0" style={{ zIndex: 10 }}>
+              {opponentTrophies.length > 0 ? (
+                <div className="relative">
+                  <CardBack count={opponentTrophies.length} label="Trophies" color="amber" width={42} height={56} />
+                  <div className="absolute -top-1 -left-1 bg-amber-500/20 p-0.5 rounded-full text-[6px] pointer-events-none">🏆</div>
+                </div>
+              ) : (
+                <EmptySlot label="Trophies" width={42} height={56} />
+              )}
+            </div>
+
+            {/* Deck Stack (Middle) */}
+            <div className="absolute top-[14px]" style={{ zIndex: 11 }}>
+              {opponentDeck.length > 0 ? (
+                <CardBack count={opponentDeck.length} label="Deck" color="purple" width={42} height={56} />
+              ) : (
+                <EmptySlot label="Deck Empty" width={42} height={56} />
+              )}
+            </div>
+
+            {/* Initial Effect (Bottom) */}
+            <div className="absolute top-[28px]" style={{ zIndex: 12 }}>
+              {opponentInitialValue ? (
+                <div className="w-[42px] h-[56px] rounded-xl border border-rose-500/50 bg-rose-950/40 flex flex-col items-center justify-between p-1 text-center shadow-lg cursor-pointer" onClick={() => onZoomCard(opponentInitialValue)}>
+                  <span className="text-[4.5px] font-black text-rose-300 uppercase tracking-wide">Initial</span>
+                  <span className="text-[5.5px] font-black text-white leading-none line-clamp-2">{opponentInitialValue.name}</span>
+                  <span className="text-[5.5px] font-black text-rose-400">+{opponentInitialValue.power}</span>
+                </div>
+              ) : (
+                <EmptySlot label="No Initial" width={42} height={56} />
+              )}
+            </div>
+          </div>
+
+          {/* Column 3: Clash/Active Area */}
+          <div className="w-[180px] h-[95px] relative flex items-center justify-center border border-dashed border-red-900/25 rounded-xl bg-red-950/5">
+            {/* Active Creature Slot */}
+            <div className="absolute left-3">
+              {opponentActive ? (
+                <div className="w-[50px] h-[68px] flex items-center justify-center relative select-none">
+                  <div className="absolute origin-center scale-[0.5]">
+                    <FullCard card={opponentActive} dimmed={matchPhase === "resolved" && clashResult?.winner === "player"} onZoom={onZoomCard} />
+                  </div>
+                  {opponentActive && (
+                    <span className="absolute -bottom-1 -right-1 bg-red-955 border border-red-500 text-white font-black text-[6.5px] px-1 rounded-sm shadow-md z-30">
+                      P: {opponentActive.power + (opponentItem ? opponentItem.power : 0) + (opponentEffects.length * 2) + (opponentInitialValue ? opponentInitialValue.power : 0)}
+                    </span>
+                  )}
+                </div>
+              ) : (
+                <EmptySlot label="Awaiting..." width={50} height={68} />
+              )}
+            </div>
+
+            {/* Item Slot (Top-Right) */}
+            <div className="absolute right-3 top-1">
+              {opponentItem ? (
+                <div className="w-[38px] h-[48px] flex items-center justify-center relative select-none">
+                  <div className="absolute origin-center scale-[0.4]">
+                    <FullCard card={opponentItem} onZoom={onZoomCard} />
+                  </div>
+                </div>
+              ) : (
+                <EmptySlot label="Item" width={38} height={42} dashed />
+              )}
+            </div>
+
+            {/* Effect Slot (Bottom-Right) */}
+            <div className="absolute right-3 bottom-1">
+              {opponentEffects.length > 0 ? (
+                <div className="w-[38px] h-[48px] flex items-center justify-center relative select-none">
+                  <div className="absolute origin-center scale-[0.4]">
+                    <FullCard card={opponentEffects[opponentEffects.length - 1]} onZoom={onZoomCard} />
+                  </div>
+                </div>
+              ) : (
+                <EmptySlot label="Effect" width={38} height={42} dashed />
+              )}
+            </div>
           </div>
         </div>
 
-        {/* CENTER AREA: Clashing duel mat */}
-        <div className="flex-1 flex flex-col justify-between items-center relative min-w-[320px]">
-          
-          {/* Clash Turn outcome text label */}
-          {clashResult && (
-            <div className="absolute top-1 z-35 text-center bg-[#150f35]/95 border border-purple-800/40 rounded-lg px-2.5 py-0.5 max-w-[300px]">
-              <span className={`text-[8px] font-['Nunito'] font-bold leading-tight ${clashResult.winner === "player" ? "text-emerald-400" : clashResult.winner === "opponent" ? "text-rose-400" : "text-amber-400"}`}>
-                {clashResult.reason}
-              </span>
-            </div>
-          )}
+        {/* Clash VS Indicator */}
+        <div className="h-4 flex items-center justify-center relative w-full pr-[180px]">
+          <div className="absolute right-[115px] flex items-center gap-2">
+            <div className="w-10 h-[1px] bg-gradient-to-r from-transparent to-purple-800" />
+            <span className="font-['Cinzel'] text-amber-400 text-[10px] font-black italic select-none">VS</span>
+            <div className="w-10 h-[1px] bg-gradient-to-l from-transparent to-purple-800" />
+          </div>
+        </div>
 
-          {/* Opponent Active Creature Slot */}
-          <div className="flex-1 flex items-center justify-center w-full relative">
-            <div className="absolute top-0 text-[8px] text-red-500 uppercase tracking-widest font-black opacity-80">Opponent Creature</div>
-            {opponentActive ? (
-              <div className="scale-75 transition-all">
-                <FullCard card={opponentActive} dimmed={matchPhase === "resolved" && clashResult?.winner === "player"} onZoom={onZoomCard} />
-              </div>
+        {/* PLAYER BOARD (Bottom Half) */}
+        <div className="w-full flex justify-center items-center gap-6 h-[115px] relative">
+          {/* Label indicating Player Side */}
+          <div className="absolute left-2 bottom-8 flex flex-col items-center opacity-60">
+            <span className="text-[6px] text-purple-400 font-bold uppercase tracking-widest leading-none">Your Mat</span>
+          </div>
+
+          {/* Column 1: Discard Stack */}
+          <div className="w-[50px] flex flex-col items-center justify-center">
+            <span className="text-[5px] text-slate-500 font-black mb-0.5">DISCARD ({playerDiscard.length})</span>
+            {playerDiscard.length > 0 ? (
+              <CardBack count={playerDiscard.length} label="Discard" color="slate" width={42} height={56} />
             ) : (
-              <EmptySlot label="Awaiting..." width={54} height={74} />
-            )}
-            {opponentItem && (
-              <span className="absolute right-4 text-[7px] text-cyan-400 bg-cyan-950/50 border border-cyan-800/40 px-1 rounded font-bold">
-                +{opponentItem.power} ({opponentItem.name})
-              </span>
+              <EmptySlot label="Discard" width={42} height={56} />
             )}
           </div>
 
-          {/* Clash Line VS Indicator */}
-          <div className="h-6 flex items-center gap-2 relative">
-            <div className="w-16 h-[1px] bg-gradient-to-r from-transparent to-purple-800" />
-            <span className="font-['Cinzel'] text-amber-400 text-xs font-black italic select-none">VS</span>
-            <div className="w-16 h-[1px] bg-gradient-to-l from-transparent to-purple-800" />
+          {/* Column 2: Trophy Stack, Deck, Initial Effect (Overlapping Stack) */}
+          <div className="w-[120px] h-[86px] relative flex flex-col items-center justify-center">
+            {/* Trophy Stack (Top) */}
+            <div className="absolute top-0" style={{ zIndex: 10 }}>
+              {playerTrophies.length > 0 ? (
+                <div className="relative">
+                  <CardBack count={playerTrophies.length} label="Trophies" color="amber" width={42} height={56} />
+                  <div className="absolute -top-1 -left-1 bg-amber-500/20 p-0.5 rounded-full text-[6px] pointer-events-none">🏆</div>
+                </div>
+              ) : (
+                <EmptySlot label="Trophies" width={42} height={56} />
+              )}
+            </div>
+
+            {/* Deck Stack (Middle) */}
+            <div className="absolute top-[14px]" style={{ zIndex: 11 }}>
+              {playerDeck.length > 0 ? (
+                <CardBack count={playerDeck.length} label="Deck" color="purple" width={42} height={56} onClick={drawCardToHand} />
+              ) : (
+                <EmptySlot label="Deck Empty" width={42} height={56} />
+              )}
+            </div>
+
+            {/* Initial Effect (Bottom) */}
+            <div className="absolute top-[28px]" style={{ zIndex: 12 }}>
+              {playerInitialValue ? (
+                <div className="w-[42px] h-[56px] rounded-xl border border-rose-500/50 bg-rose-950/40 flex flex-col items-center justify-between p-1 text-center shadow-lg cursor-pointer" onClick={() => onZoomCard(playerInitialValue)}>
+                  <span className="text-[4.5px] font-black text-rose-300 uppercase tracking-wide">Initial</span>
+                  <span className="text-[5.5px] font-black text-white leading-none line-clamp-2">{playerInitialValue.name}</span>
+                  <span className="text-[5.5px] font-black text-rose-400">+{playerInitialValue.power}</span>
+                </div>
+              ) : (
+                <EmptySlot label="No Initial" width={42} height={56} />
+              )}
+            </div>
           </div>
 
-          {/* Player Active Creature Slot (Drag Target) */}
+          {/* Column 3: Clash/Active Area */}
           <div 
             id="player-active-slot"
-            className={`flex-1 flex items-center justify-center w-full relative transition-all rounded-xl ${isDragOver ? "bg-purple-500/20 border border-dashed border-purple-500 scale-[1.03]" : ""}`}
+            className={`w-[180px] h-[95px] relative flex items-center justify-center border transition-all rounded-xl ${isDragOver ? "bg-purple-500/20 border-dashed border-purple-500 scale-[1.02]" : "border-purple-900/30 bg-purple-955/5"}`}
             onDragOver={(e) => {
               e.preventDefault();
               setIsDragOver(true);
@@ -1910,57 +2076,63 @@ function GameMatScreen({ onNavigate, profile, setProfile, catalog, setMatchHisto
               }
             }}
           >
-            <div className="absolute bottom-0 text-[8px] text-purple-400 uppercase tracking-widest font-black opacity-80">Your Creature</div>
-            {playerActive ? (
-              <div className="scale-75 transition-all relative">
-                <FullCard card={playerActive} dimmed={matchPhase === "resolved" && clashResult?.winner === "opponent"} onZoom={onZoomCard} />
-                {floatPowerText && (
-                  <div className="absolute -top-10 left-1/2 -translate-x-1/2 text-xs font-black text-emerald-400 animate-bounce bg-black/75 px-1.5 py-0.5 rounded border border-emerald-500/30 shadow-lg z-40">
-                    {floatPowerText}
+            {/* Active Creature Slot */}
+            <div className="absolute left-3">
+              {playerActive ? (
+                <div className="w-[50px] h-[68px] flex items-center justify-center relative select-none">
+                  <div className="absolute origin-center scale-[0.5]">
+                    <FullCard card={playerActive} dimmed={matchPhase === "resolved" && clashResult?.winner === "opponent"} onZoom={onZoomCard} />
                   </div>
-                )}
-              </div>
-            ) : (
-              <EmptySlot label="Drop Here" width={54} height={74} />
-            )}
-            {equippedItem && (
-              <div className="absolute right-4 text-[7px] text-cyan-400 bg-cyan-950/50 border border-cyan-800/40 px-1.5 py-0.5 rounded font-bold flex items-center gap-1 z-30">
-                <span>+{equippedItem.power} ({equippedItem.name})</span>
-                <button onClick={(e) => { e.stopPropagation(); setPlayerDiscard(prev => [...prev, equippedItem]); setEquippedItem(null); }} className="text-red-400 hover:text-red-300 font-bold font-sans">×</button>
-              </div>
-            )}
-          </div>
-        </div>
+                  {playerActive && (
+                    <span className="absolute -bottom-1 -right-1 bg-purple-955 border border-purple-500 text-white font-black text-[6.5px] px-1 rounded-sm shadow-md z-30">
+                      P: {playerActive.power + (equippedItem ? equippedItem.power : 0) + (playerEffects.length * 2) + (playerInitialValue ? playerInitialValue.power : 0)}
+                    </span>
+                  )}
+                  {floatPowerText && (
+                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[8px] font-black text-emerald-400 animate-bounce bg-black/75 px-1 py-0.5 rounded border border-emerald-500/30 shadow-lg z-40">
+                      {floatPowerText}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <EmptySlot label="Drop Here" width={50} height={68} />
+              )}
+            </div>
 
-        {/* RIGHT AREA: Stacks block */}
-        <div className="w-24 flex flex-col justify-between items-center gap-1.5 py-1 flex-shrink-0">
-          
-          {/* Draw deck pile */}
-          <div className="flex flex-col items-center">
-            <span className="text-[6px] text-purple-600 uppercase font-black">Deck ({playerDeck.length})</span>
-            {playerDeck.length > 0 ? (
-              <CardBack count={playerDeck.length} label="Draw" color="purple" onClick={drawCardToHand} />
-            ) : (
-              <EmptySlot label="Empty" width={50} height={66} />
-            )}
-          </div>
+            {/* Item Slot (Top-Right) */}
+            <div className="absolute right-3 top-1">
+              {equippedItem ? (
+                <div className="w-[38px] h-[48px] flex items-center justify-center relative select-none">
+                  <div className="absolute origin-center scale-[0.4]">
+                    <FullCard card={equippedItem} onZoom={onZoomCard} />
+                  </div>
+                  <button 
+                    onClick={(e) => { 
+                      e.stopPropagation(); 
+                      setPlayerDiscard(prev => [...prev, equippedItem]); 
+                      setEquippedItem(null); 
+                    }} 
+                    className="absolute -top-1.5 -right-1.5 z-50 w-3.5 h-3.5 rounded-full bg-red-600 hover:bg-red-500 text-white font-bold text-[8px] flex items-center justify-center"
+                  >
+                    ×
+                  </button>
+                </div>
+              ) : (
+                <EmptySlot label="Item" width={38} height={42} dashed />
+              )}
+            </div>
 
-          {/* Discard pile */}
-          <div className="flex flex-col items-center">
-            <span className="text-[6px] text-slate-500 uppercase font-black">Discard ({playerDiscard.length})</span>
-            {playerDiscard.length > 0 ? (
-              <CardBack count={playerDiscard.length} label="Discard" color="slate" />
-            ) : (
-              <EmptySlot label="Discard" width={50} height={66} />
-            )}
-          </div>
-
-          {/* Trophy Stack with crown icon */}
-          <div className="flex flex-col items-center">
-            <span className="text-[6px] text-amber-500 uppercase font-black">Trophies ({playerTrophies.length})</span>
-            <div className="relative">
-              <CardBack count={playerTrophies.length} label="Trophies" color="amber" />
-              <div className="absolute top-1 left-1 bg-amber-500/20 p-0.5 rounded-full text-[8px] pointer-events-none">🏆</div>
+            {/* Effect Slot (Bottom-Right) */}
+            <div className="absolute right-3 bottom-1">
+              {playerEffects.length > 0 ? (
+                <div className="w-[38px] h-[48px] flex items-center justify-center relative select-none">
+                  <div className="absolute origin-center scale-[0.4]">
+                    <FullCard card={playerEffects[playerEffects.length - 1]} onZoom={onZoomCard} />
+                  </div>
+                </div>
+              ) : (
+                <EmptySlot label="Effect" width={38} height={42} dashed />
+              )}
             </div>
           </div>
         </div>
@@ -1968,12 +2140,12 @@ function GameMatScreen({ onNavigate, profile, setProfile, catalog, setMatchHisto
 
       {/* Clashing controls row */}
       {!autoplay && (matchPhase === "ready" || matchPhase === "resolved" || matchPhase === "tie_breaker") && (
-        <div className="absolute top-[80px] left-1/2 -translate-x-1/2 z-40">
+        <div className="absolute top-[138px] left-[15px] z-45">
           <button
             onClick={playClashTurn}
-            className="px-6 py-2 rounded-full font-['Nunito'] font-black text-[10px] uppercase tracking-wider bg-gradient-to-r from-amber-500 to-orange-500 text-amber-955 shadow-lg active:scale-95 hover:brightness-110 transition-all cursor-pointer"
+            className="px-4 py-1.5 rounded-full font-['Nunito'] font-black text-[9px] uppercase tracking-wider bg-gradient-to-r from-amber-500 to-orange-500 text-amber-955 shadow-lg active:scale-95 hover:brightness-110 transition-all cursor-pointer border border-amber-400/30"
           >
-            {matchPhase === "tie_breaker" ? "Execute Tie-Breaker!" : "Clash! Reveal Cards"}
+            {matchPhase === "tie_breaker" ? "Execute Tie-Breaker!" : "Clash! Reveal"}
           </button>
         </div>
       )}
