@@ -1749,6 +1749,15 @@ function GameMatScreen({ onNavigate, profile, setProfile, catalog, setMatchHisto
     }, 1500);
   };
 
+  // Automatically clear clash result after 3 seconds
+  useEffect(() => {
+    if (!clashResult) return;
+    const timer = setTimeout(() => {
+      setClashResult(null);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [clashResult]);
+
   // Run autoplay turn sequence
   useEffect(() => {
     if (!autoplay) return;
