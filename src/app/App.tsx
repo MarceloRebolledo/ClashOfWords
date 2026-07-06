@@ -1615,7 +1615,7 @@ function GameMatScreen({ onNavigate, profile, setProfile, catalog, setMatchHisto
     let currentPActive = playerActive;
     let currentOActive = opponentActive;
 
-    if (matchPhase === "resolved") {
+    if (matchPhase === "resolved" || matchPhase === "tie_breaker") {
       currentPActive = null;
       currentOActive = null;
       setPlayerActive(null);
@@ -1905,39 +1905,40 @@ function GameMatScreen({ onNavigate, profile, setProfile, catalog, setMatchHisto
             )}
           </div>
 
-          {/* Column 2: Trophy Stack, Deck, Initial Effect (Overlapping Stack) */}
-          <div className="w-[120px] h-[86px] relative flex flex-col items-center justify-center">
-            {/* Trophy Stack (Top) */}
-            <div className="absolute top-0" style={{ zIndex: 10 }}>
-              {opponentTrophies.length > 0 ? (
-                <div className="relative">
-                  <CardBack count={opponentTrophies.length} label="Trophies" color="amber" width={42} height={56} />
-                  <div className="absolute -top-1 -left-1 bg-amber-500/20 p-0.5 rounded-full text-[6px] pointer-events-none">🏆</div>
-                </div>
-              ) : (
-                <EmptySlot label="Trophies" width={42} height={56} />
-              )}
+          {/* Column 2: Trophy Stack, Deck, Initial Effect */}
+          <div className="w-[120px] h-[115px] relative flex flex-col justify-between py-1.5 flex-shrink-0 select-none">
+            {/* Top Row: Trophy Stack & Deck */}
+            <div className="flex justify-between items-center w-full px-1">
+              <div className="relative">
+                {opponentTrophies.length > 0 ? (
+                  <div className="relative">
+                    <CardBack count={opponentTrophies.length} label="Trophies" color="amber" width={40} height={52} />
+                    <div className="absolute -top-1 -left-1 bg-amber-500/20 p-0.5 rounded-full text-[6px] pointer-events-none">🏆</div>
+                  </div>
+                ) : (
+                  <EmptySlot label="Trophies" width={40} height={52} />
+                )}
+              </div>
+
+              <div>
+                {opponentDeck.length > 0 ? (
+                  <CardBack count={opponentDeck.length} label="Deck" color="purple" width={40} height={52} />
+                ) : (
+                  <EmptySlot label="Deck Empty" width={40} height={52} />
+                )}
+              </div>
             </div>
 
-            {/* Deck Stack (Middle) */}
-            <div className="absolute top-[14px]" style={{ zIndex: 11 }}>
-              {opponentDeck.length > 0 ? (
-                <CardBack count={opponentDeck.length} label="Deck" color="purple" width={42} height={56} />
-              ) : (
-                <EmptySlot label="Deck Empty" width={42} height={56} />
-              )}
-            </div>
-
-            {/* Initial Effect (Bottom) */}
-            <div className="absolute top-[28px]" style={{ zIndex: 12 }}>
+            {/* Bottom Row: Initial Effect */}
+            <div className="flex justify-center w-full">
               {opponentInitialValue ? (
-                <div className="w-[42px] h-[56px] rounded-xl border border-rose-500/50 bg-rose-950/40 flex flex-col items-center justify-between p-1 text-center shadow-lg cursor-pointer" onClick={() => onZoomCard(opponentInitialValue)}>
-                  <span className="text-[4.5px] font-black text-rose-300 uppercase tracking-wide">Initial</span>
-                  <span className="text-[5.5px] font-black text-white leading-none line-clamp-2">{opponentInitialValue.name}</span>
-                  <span className="text-[5.5px] font-black text-rose-400">+{opponentInitialValue.power}</span>
+                <div className="w-[40px] h-[52px] rounded-xl border border-rose-500/50 bg-rose-950/40 flex flex-col items-center justify-between p-0.5 text-center shadow-lg cursor-pointer" onClick={() => onZoomCard(opponentInitialValue)}>
+                  <span className="text-[4px] font-black text-rose-300 uppercase tracking-wide leading-none">Initial</span>
+                  <span className="text-[5px] font-black text-white leading-none line-clamp-2">{opponentInitialValue.name}</span>
+                  <span className="text-[5px] font-black text-rose-400">+{opponentInitialValue.power}</span>
                 </div>
               ) : (
-                <EmptySlot label="No Initial" width={42} height={56} />
+                <EmptySlot label="No Initial" width={40} height={52} />
               )}
             </div>
           </div>
@@ -2016,39 +2017,40 @@ function GameMatScreen({ onNavigate, profile, setProfile, catalog, setMatchHisto
             )}
           </div>
 
-          {/* Column 2: Trophy Stack, Deck, Initial Effect (Overlapping Stack) */}
-          <div className="w-[120px] h-[86px] relative flex flex-col items-center justify-center">
-            {/* Trophy Stack (Top) */}
-            <div className="absolute top-0" style={{ zIndex: 10 }}>
-              {playerTrophies.length > 0 ? (
-                <div className="relative">
-                  <CardBack count={playerTrophies.length} label="Trophies" color="amber" width={42} height={56} />
-                  <div className="absolute -top-1 -left-1 bg-amber-500/20 p-0.5 rounded-full text-[6px] pointer-events-none">🏆</div>
-                </div>
-              ) : (
-                <EmptySlot label="Trophies" width={42} height={56} />
-              )}
+          {/* Column 2: Trophy Stack, Deck, Initial Effect */}
+          <div className="w-[120px] h-[115px] relative flex flex-col justify-between py-1.5 flex-shrink-0 select-none">
+            {/* Top Row: Trophy Stack & Deck */}
+            <div className="flex justify-between items-center w-full px-1">
+              <div className="relative">
+                {playerTrophies.length > 0 ? (
+                  <div className="relative">
+                    <CardBack count={playerTrophies.length} label="Trophies" color="amber" width={40} height={52} />
+                    <div className="absolute -top-1 -left-1 bg-amber-500/20 p-0.5 rounded-full text-[6px] pointer-events-none">🏆</div>
+                  </div>
+                ) : (
+                  <EmptySlot label="Trophies" width={40} height={52} />
+                )}
+              </div>
+
+              <div>
+                {playerDeck.length > 0 ? (
+                  <CardBack count={playerDeck.length} label="Deck" color="purple" width={40} height={52} onClick={drawCardToHand} />
+                ) : (
+                  <EmptySlot label="Deck Empty" width={40} height={52} />
+                )}
+              </div>
             </div>
 
-            {/* Deck Stack (Middle) */}
-            <div className="absolute top-[14px]" style={{ zIndex: 11 }}>
-              {playerDeck.length > 0 ? (
-                <CardBack count={playerDeck.length} label="Deck" color="purple" width={42} height={56} onClick={drawCardToHand} />
-              ) : (
-                <EmptySlot label="Deck Empty" width={42} height={56} />
-              )}
-            </div>
-
-            {/* Initial Effect (Bottom) */}
-            <div className="absolute top-[28px]" style={{ zIndex: 12 }}>
+            {/* Bottom Row: Initial Effect */}
+            <div className="flex justify-center w-full">
               {playerInitialValue ? (
-                <div className="w-[42px] h-[56px] rounded-xl border border-rose-500/50 bg-rose-950/40 flex flex-col items-center justify-between p-1 text-center shadow-lg cursor-pointer" onClick={() => onZoomCard(playerInitialValue)}>
-                  <span className="text-[4.5px] font-black text-rose-300 uppercase tracking-wide">Initial</span>
-                  <span className="text-[5.5px] font-black text-white leading-none line-clamp-2">{playerInitialValue.name}</span>
-                  <span className="text-[5.5px] font-black text-rose-400">+{playerInitialValue.power}</span>
+                <div className="w-[40px] h-[52px] rounded-xl border border-rose-500/50 bg-rose-950/40 flex flex-col items-center justify-between p-0.5 text-center shadow-lg cursor-pointer" onClick={() => onZoomCard(playerInitialValue)}>
+                  <span className="text-[4px] font-black text-rose-300 uppercase tracking-wide leading-none">Initial</span>
+                  <span className="text-[5px] font-black text-white leading-none line-clamp-2">{playerInitialValue.name}</span>
+                  <span className="text-[5px] font-black text-rose-400">+{playerInitialValue.power}</span>
                 </div>
               ) : (
-                <EmptySlot label="No Initial" width={42} height={56} />
+                <EmptySlot label="No Initial" width={40} height={52} />
               )}
             </div>
           </div>
@@ -2197,9 +2199,21 @@ function GameMatScreen({ onNavigate, profile, setProfile, catalog, setMatchHisto
       {tutorialStep !== null && (
         <div className="absolute top-12 left-4 z-50 pointer-events-auto animate-fade-in">
           <div className="max-w-[180px] rounded-xl bg-[#150f35]/95 border-2 border-amber-500 p-3 text-center flex flex-col gap-2.5 shadow-[0_0_20px_rgba(245,158,11,0.3)]">
-            <div className="flex items-center gap-1.5 justify-center">
-              <span className="text-sm">✨</span>
-              <h4 className="font-['Nunito'] font-black text-amber-400 text-[10px] uppercase tracking-wider">Tutorial</h4>
+            <div className="flex items-center justify-between w-full border-b border-purple-900/35 pb-1">
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm">✨</span>
+                <h4 className="font-['Nunito'] font-black text-amber-400 text-[10px] uppercase tracking-wider">Tutorial</h4>
+              </div>
+              <button 
+                onClick={() => {
+                  localStorage.setItem("cow_tutorial_completed", "true");
+                  setTutorialStep(null);
+                }}
+                className="text-purple-400 hover:text-white font-bold text-xs cursor-pointer px-1"
+                title="Skip Tutorial"
+              >
+                ×
+              </button>
             </div>
             <p className="text-[9px] text-purple-200 leading-normal font-sans text-left">
               {tutorialStep === 1 && "Welcome! Tap the Draw Deck on the right to draw cards to your hand."}
