@@ -1877,322 +1877,328 @@ function GameMatScreen({ onNavigate, profile, setProfile, catalog, setMatchHisto
       </div>
 
       {/* Main landscape battlefield divided horizontally */}
-      <div className="flex-1 flex flex-col justify-between items-center px-4 py-1 gap-1 overflow-hidden relative z-20">
+      <div className="flex-1 flex flex-row items-stretch overflow-hidden relative z-20">
         
-        {/* Clash Turn outcome text label */}
-        {clashResult && (
-          <div className="absolute top-[102px] left-3 z-45 text-center bg-[#150f35]/95 border border-purple-800/40 rounded-lg px-2.5 py-0.5 max-w-[280px] shadow-2xl">
-            <span className={`text-[8px] font-['Nunito'] font-bold leading-tight ${clashResult.winner === "player" ? "text-emerald-400" : clashResult.winner === "opponent" ? "text-rose-400" : "text-amber-400"}`}>
-              {clashResult.reason}
-            </span>
-          </div>
-        )}
+        {/* LEFT AREA: Clashing duel mat */}
+        <div className="flex-1 flex flex-col justify-between items-center px-4 py-2 relative h-full">
+          
+          {/* Clash Turn outcome text label */}
+          {clashResult && (
+            <div className="absolute top-[152px] left-[130px] z-45 text-left bg-[#150f35]/95 border border-purple-800/40 rounded-lg px-2.5 py-1 max-w-[280px] shadow-2xl">
+              <span className={`text-[8.5px] font-['Nunito'] font-bold leading-tight ${clashResult.winner === "player" ? "text-emerald-400" : clashResult.winner === "opponent" ? "text-rose-400" : "text-amber-400"}`}>
+                {clashResult.reason}
+              </span>
+            </div>
+          )}
 
-        {/* OPPONENT BOARD (Top Half) */}
-        <div className="w-full flex justify-center items-center gap-6 h-[115px] relative">
-          {/* Label indicating Opponent Side */}
-          <div className="absolute left-2 top-8 flex flex-col items-center opacity-60">
-            <span className="text-[6px] text-red-500 font-bold uppercase tracking-widest leading-none">Opponent Mat</span>
-          </div>
-
-          {/* Column 1: Discard Stack */}
-          <div className="w-[50px] flex flex-col items-center justify-center">
-            <span className="text-[5px] text-slate-500 font-black mb-0.5">DISCARD ({opponentDiscard.length})</span>
-            {opponentDiscard.length > 0 ? (
-              <CardBack count={opponentDiscard.length} label="Discard" color="slate" width={42} height={56} />
-            ) : (
-              <EmptySlot label="Discard" width={42} height={56} />
-            )}
-          </div>
-
-          {/* Column 2: Trophy Stack, Deck, Initial Effect */}
-          <div className="w-[120px] h-[115px] relative flex flex-col justify-between py-1.5 flex-shrink-0 select-none">
-            {/* Top Row: Trophy Stack & Deck */}
-            <div className="flex justify-between items-center w-full px-1">
-              <div className="relative">
-                {opponentTrophies.length > 0 ? (
-                  <div className="relative">
-                    <CardBack count={opponentTrophies.length} label="Trophies" color="amber" width={40} height={52} />
-                    <div className="absolute -top-1 -left-1 bg-amber-500/20 p-0.5 rounded-full text-[6px] pointer-events-none">🏆</div>
-                  </div>
-                ) : (
-                  <EmptySlot label="Trophies" width={40} height={52} />
-                )}
-              </div>
-
-              <div>
-                {opponentDeck.length > 0 ? (
-                  <CardBack count={opponentDeck.length} label="Deck" color="purple" width={40} height={52} />
-                ) : (
-                  <EmptySlot label="Deck Empty" width={40} height={52} />
-                )}
-              </div>
+          {/* OPPONENT BOARD (Top Half) */}
+          <div className="w-full flex justify-center items-center gap-6 h-[125px] relative">
+            {/* Label indicating Opponent Side */}
+            <div className="absolute left-2 top-8 flex flex-col items-center opacity-60">
+              <span className="text-[6px] text-red-500 font-bold uppercase tracking-widest leading-none">Opponent Mat</span>
             </div>
 
-            {/* Bottom Row: Initial Effect */}
-            <div className="flex justify-center w-full">
-              {opponentInitialValue ? (
-                <div className="w-[40px] h-[52px] rounded-xl border border-rose-500/50 bg-rose-950/40 flex flex-col items-center justify-between p-0.5 text-center shadow-lg cursor-pointer" onClick={() => onZoomCard(opponentInitialValue)}>
-                  <span className="text-[4px] font-black text-rose-300 uppercase tracking-wide leading-none">Initial</span>
-                  <span className="text-[5px] font-black text-white leading-none line-clamp-2">{opponentInitialValue.name}</span>
-                  <span className="text-[5px] font-black text-rose-400">+{opponentInitialValue.power}</span>
-                </div>
+            {/* Column 1: Discard Stack */}
+            <div className="w-[50px] flex flex-col items-center justify-center">
+              <span className="text-[5px] text-slate-500 font-black mb-0.5">DISCARD ({opponentDiscard.length})</span>
+              {opponentDiscard.length > 0 ? (
+                <CardBack count={opponentDiscard.length} label="Discard" color="slate" width={42} height={56} />
               ) : (
-                <EmptySlot label="No Initial" width={40} height={52} />
-              )}
-            </div>
-          </div>
-
-          {/* Column 3: Clash/Active Area */}
-          <div className="w-[180px] h-[95px] relative flex items-center justify-center border border-dashed border-red-900/25 rounded-xl bg-red-950/5">
-            {/* Active Creature Slot */}
-            <div className="absolute left-3">
-              {opponentActive ? (
-                <div className="w-[50px] h-[68px] flex items-center justify-center relative select-none">
-                  <div className="absolute origin-center scale-[0.5]">
-                    <FullCard card={opponentActive} dimmed={matchPhase === "resolved" && clashResult?.winner === "player"} onZoom={onZoomCard} />
-                  </div>
-                  {opponentActive && (
-                    <span className="absolute -bottom-1 -right-1 bg-red-955 border border-red-500 text-white font-black text-[6.5px] px-1 rounded-sm shadow-md z-30">
-                      P: {opponentActive.power + (opponentItem ? opponentItem.power : 0) + (opponentEffects.length * 2) + (opponentInitialValue ? opponentInitialValue.power : 0)}
-                    </span>
-                  )}
-                </div>
-              ) : (
-                <EmptySlot label="Awaiting..." width={50} height={68} />
+                <EmptySlot label="Discard" width={42} height={56} />
               )}
             </div>
 
-            {/* Item Slot (Top-Right) */}
-            <div className="absolute right-3 top-1">
-              {opponentItem ? (
-                <div className="w-[38px] h-[48px] flex items-center justify-center relative select-none">
-                  <div className="absolute origin-center scale-[0.4]">
-                    <FullCard card={opponentItem} onZoom={onZoomCard} />
-                  </div>
-                </div>
-              ) : (
-                <EmptySlot label="Item" width={38} height={42} dashed />
-              )}
-            </div>
-
-            {/* Effect Slot (Bottom-Right) */}
-            <div className="absolute right-3 bottom-1">
-              {opponentEffects.length > 0 ? (
-                <div className="w-[38px] h-[48px] flex items-center justify-center relative select-none">
-                  <div className="absolute origin-center scale-[0.4]">
-                    <FullCard card={opponentEffects[opponentEffects.length - 1]} onZoom={onZoomCard} />
-                  </div>
-                </div>
-              ) : (
-                <EmptySlot label="Effect" width={38} height={42} dashed />
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Clash VS Indicator */}
-        <div className="h-4 flex items-center justify-center relative w-full pr-[180px]">
-          <div className="absolute right-[115px] flex items-center gap-2">
-            <div className="w-10 h-[1px] bg-gradient-to-r from-transparent to-purple-800" />
-            <span className="font-['Cinzel'] text-amber-400 text-[10px] font-black italic select-none">VS</span>
-            <div className="w-10 h-[1px] bg-gradient-to-l from-transparent to-purple-800" />
-          </div>
-        </div>
-
-        {/* PLAYER BOARD (Bottom Half) */}
-        <div className="w-full flex justify-center items-center gap-6 h-[115px] relative">
-          {/* Label indicating Player Side */}
-          <div className="absolute left-2 bottom-8 flex flex-col items-center opacity-60">
-            <span className="text-[6px] text-purple-400 font-bold uppercase tracking-widest leading-none">Your Mat</span>
-          </div>
-
-          {/* Column 1: Discard Stack */}
-          <div className="w-[50px] flex flex-col items-center justify-center">
-            <span className="text-[5px] text-slate-500 font-black mb-0.5">DISCARD ({playerDiscard.length})</span>
-            {playerDiscard.length > 0 ? (
-              <CardBack count={playerDiscard.length} label="Discard" color="slate" width={42} height={56} />
-            ) : (
-              <EmptySlot label="Discard" width={42} height={56} />
-            )}
-          </div>
-
-          {/* Column 2: Trophy Stack, Deck, Initial Effect */}
-          <div className="w-[120px] h-[115px] relative flex flex-col justify-between py-1.5 flex-shrink-0 select-none">
-            {/* Top Row: Trophy Stack & Deck */}
-            <div className="flex justify-between items-center w-full px-1">
-              <div className="relative">
-                {playerTrophies.length > 0 ? (
-                  <div className="relative">
-                    <CardBack count={playerTrophies.length} label="Trophies" color="amber" width={40} height={52} />
-                    <div className="absolute -top-1 -left-1 bg-amber-500/20 p-0.5 rounded-full text-[6px] pointer-events-none">🏆</div>
-                  </div>
-                ) : (
-                  <EmptySlot label="Trophies" width={40} height={52} />
-                )}
-              </div>
-
-              <div>
-                {playerDeck.length > 0 ? (
-                  <CardBack count={playerDeck.length} label="Deck" color="purple" width={40} height={52} onClick={drawCardToHand} />
-                ) : (
-                  <EmptySlot label="Deck Empty" width={40} height={52} />
-                )}
-              </div>
-            </div>
-
-            {/* Bottom Row: Initial Effect */}
-            <div className="flex justify-center w-full">
-              {playerInitialValue ? (
-                <div className="w-[40px] h-[52px] rounded-xl border border-rose-500/50 bg-rose-950/40 flex flex-col items-center justify-between p-0.5 text-center shadow-lg cursor-pointer" onClick={() => onZoomCard(playerInitialValue)}>
-                  <span className="text-[4px] font-black text-rose-300 uppercase tracking-wide leading-none">Initial</span>
-                  <span className="text-[5px] font-black text-white leading-none line-clamp-2">{playerInitialValue.name}</span>
-                  <span className="text-[5px] font-black text-rose-400">+{playerInitialValue.power}</span>
-                </div>
-              ) : (
-                <EmptySlot label="No Initial" width={40} height={52} />
-              )}
-            </div>
-          </div>
-
-          {/* Column 3: Clash/Active Area */}
-          <div 
-            id="player-active-slot"
-            className={`w-[180px] h-[95px] relative flex items-center justify-center border transition-all rounded-xl ${isDragOver ? "bg-purple-500/20 border-dashed border-purple-500 scale-[1.02]" : "border-purple-900/30 bg-purple-955/5"}`}
-            onDragOver={(e) => {
-              e.preventDefault();
-              setIsDragOver(true);
-            }}
-            onDragLeave={() => setIsDragOver(false)}
-            onDrop={(e) => {
-              e.preventDefault();
-              setIsDragOver(false);
-              const cardId = e.dataTransfer.getData("text/plain");
-              const card = playerHand.find(c => c.id === cardId);
-              if (card) playCardFromHand(card);
-            }}
-            onClick={() => {
-              if (selectedHandCard) {
-                playCardFromHand(selectedHandCard);
-                setSelectedHandCard(null);
-              }
-            }}
-          >
-            {/* Active Creature Slot */}
-            <div className="absolute left-3">
-              {playerActive ? (
-                <div className="w-[50px] h-[68px] flex items-center justify-center relative select-none">
-                  <div className="absolute origin-center scale-[0.5]">
-                    <FullCard card={playerActive} dimmed={matchPhase === "resolved" && clashResult?.winner === "opponent"} onZoom={onZoomCard} />
-                  </div>
-                  {playerActive && (
-                    <span className="absolute -bottom-1 -right-1 bg-purple-955 border border-purple-500 text-white font-black text-[6.5px] px-1 rounded-sm shadow-md z-30">
-                      P: {playerActive.power + (equippedItem ? equippedItem.power : 0) + (playerEffects.length * 2) + (playerInitialValue ? playerInitialValue.power : 0)}
-                    </span>
-                  )}
-                  {floatPowerText && (
-                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[8px] font-black text-emerald-400 animate-bounce bg-black/75 px-1 py-0.5 rounded border border-emerald-500/30 shadow-lg z-40">
-                      {floatPowerText}
+            {/* Column 2: Trophy Stack, Deck, Initial Effect */}
+            <div className="w-[120px] h-[115px] relative flex flex-col justify-between py-1.5 flex-shrink-0 select-none">
+              {/* Top Row: Trophy Stack & Deck */}
+              <div className="flex justify-between items-center w-full px-1">
+                <div className="relative">
+                  {opponentTrophies.length > 0 ? (
+                    <div className="relative">
+                      <CardBack count={opponentTrophies.length} label="Trophies" color="amber" width={40} height={52} />
+                      <div className="absolute -top-1 -left-1 bg-amber-500/20 p-0.5 rounded-full text-[6px] pointer-events-none">🏆</div>
                     </div>
+                  ) : (
+                    <EmptySlot label="Trophies" width={40} height={52} />
                   )}
                 </div>
-              ) : (
-                <EmptySlot label="Drop Here" width={50} height={68} />
-              )}
-            </div>
 
-            {/* Item Slot (Top-Right) */}
-            <div className="absolute right-3 top-1">
-              {equippedItem ? (
-                <div className="w-[38px] h-[48px] flex items-center justify-center relative select-none">
-                  <div className="absolute origin-center scale-[0.4]">
-                    <FullCard card={equippedItem} onZoom={onZoomCard} />
+                <div>
+                  {opponentDeck.length > 0 ? (
+                    <CardBack count={opponentDeck.length} label="Deck" color="purple" width={40} height={52} />
+                  ) : (
+                    <EmptySlot label="Deck Empty" width={40} height={52} />
+                  )}
+                </div>
+              </div>
+
+              {/* Bottom Row: Initial Effect */}
+              <div className="flex justify-center w-full">
+                {opponentInitialValue ? (
+                  <div className="w-[40px] h-[52px] rounded-xl border border-rose-500/50 bg-rose-950/40 flex flex-col items-center justify-between p-0.5 text-center shadow-lg cursor-pointer" onClick={() => onZoomCard(opponentInitialValue)}>
+                    <span className="text-[4px] font-black text-rose-300 uppercase tracking-wide leading-none">Initial</span>
+                    <span className="text-[5px] font-black text-white leading-none line-clamp-2">{opponentInitialValue.name}</span>
+                    <span className="text-[5px] font-black text-rose-400">+{opponentInitialValue.power}</span>
                   </div>
-                  <button 
-                    onClick={(e) => { 
-                      e.stopPropagation(); 
-                      setPlayerDiscard(prev => [...prev, equippedItem]); 
-                      setEquippedItem(null); 
-                    }} 
-                    className="absolute -top-1.5 -right-1.5 z-50 w-3.5 h-3.5 rounded-full bg-red-600 hover:bg-red-500 text-white font-bold text-[8px] flex items-center justify-center"
-                  >
-                    ×
-                  </button>
-                </div>
-              ) : (
-                <EmptySlot label="Item" width={38} height={42} dashed />
-              )}
+                ) : (
+                  <EmptySlot label="No Initial" width={40} height={52} />
+                )}
+              </div>
             </div>
 
-            {/* Effect Slot (Bottom-Right) */}
-            <div className="absolute right-3 bottom-1">
-              {playerEffects.length > 0 ? (
-                <div className="w-[38px] h-[48px] flex items-center justify-center relative select-none">
-                  <div className="absolute origin-center scale-[0.4]">
-                    <FullCard card={playerEffects[playerEffects.length - 1]} onZoom={onZoomCard} />
+            {/* Column 3: Clash/Active Area */}
+            <div className="w-[180px] h-[105px] relative flex items-center justify-center border border-dashed border-red-900/25 rounded-xl bg-red-950/5">
+              {/* Active Creature Slot */}
+              <div className="absolute left-3">
+                {opponentActive ? (
+                  <div className="w-[50px] h-[68px] flex items-center justify-center relative select-none">
+                    <div className="absolute origin-center scale-[0.5]">
+                      <FullCard card={opponentActive} dimmed={matchPhase === "resolved" && clashResult?.winner === "player"} onZoom={onZoomCard} />
+                    </div>
+                    {opponentActive && (
+                      <span className="absolute -bottom-1 -right-1 bg-red-955 border border-red-500 text-white font-black text-[6.5px] px-1 rounded-sm shadow-md z-30">
+                        P: {opponentActive.power + (opponentItem ? opponentItem.power : 0) + (opponentEffects.length * 2) + (opponentInitialValue ? opponentInitialValue.power : 0)}
+                      </span>
+                    )}
                   </div>
-                </div>
-              ) : (
-                <EmptySlot label="Effect" width={38} height={42} dashed />
-              )}
+                ) : (
+                  <EmptySlot label="Awaiting..." width={50} height={68} />
+                )}
+              </div>
+
+              {/* Item Slot (Top-Right) */}
+              <div className="absolute right-3 top-1.5">
+                {opponentItem ? (
+                  <div className="w-[38px] h-[48px] flex items-center justify-center relative select-none">
+                    <div className="absolute origin-center scale-[0.4]">
+                      <FullCard card={opponentItem} onZoom={onZoomCard} />
+                    </div>
+                  </div>
+                ) : (
+                  <EmptySlot label="Item" width={38} height={42} dashed />
+                )}
+              </div>
+
+              {/* Effect Slot (Bottom-Right) */}
+              <div className="absolute right-3 bottom-1.5">
+                {opponentEffects.length > 0 ? (
+                  <div className="w-[38px] h-[48px] flex items-center justify-center relative select-none">
+                    <div className="absolute origin-center scale-[0.4]">
+                      <FullCard card={opponentEffects[opponentEffects.length - 1]} onZoom={onZoomCard} />
+                    </div>
+                  </div>
+                ) : (
+                  <EmptySlot label="Effect" width={38} height={42} dashed />
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Clashing controls row */}
-      {!autoplay && (matchPhase === "ready" || matchPhase === "resolved" || matchPhase === "tie_breaker") && (
-        <div className="absolute top-[138px] left-[15px] z-45">
-          <button
-            onClick={playClashTurn}
-            className="px-4 py-1.5 rounded-full font-['Nunito'] font-black text-[9px] uppercase tracking-wider bg-gradient-to-r from-amber-500 to-orange-500 text-amber-955 shadow-lg active:scale-95 hover:brightness-110 transition-all cursor-pointer border border-amber-400/30"
-          >
-            {matchPhase === "tie_breaker" ? "Execute Tie-Breaker!" : "Clash! Reveal"}
-          </button>
-        </div>
-      )}
-
-      {/* Hand Dock - Fanned hand overlay */}
-      <div className="relative z-30 bg-[#080617]/95 border-t border-purple-900/40 px-3 py-1 flex flex-col h-[95px] justify-between">
-        <div className="flex justify-between items-center select-none">
-          <span className="text-[7px] text-purple-400 font-bold uppercase tracking-widest">Your Hand ({playerHand.length}/5)</span>
-          <span className="text-[6px] text-purple-600">Drag items to Creature (or click to select then tap Creature slot)</span>
-        </div>
-
-        {playerHand.length === 0 ? (
-          <div className="flex-1 flex items-center justify-center border border-dashed border-purple-900/30 rounded-xl my-1 select-none">
-            <span className="text-[8px] text-purple-700 italic">No cards. Touch Draw Deck on the right!</span>
+          {/* Clash VS Indicator */}
+          <div className="h-4 flex items-center justify-center relative w-full pr-[180px]">
+            <div className="absolute right-[115px] flex items-center gap-2">
+              <div className="w-10 h-[1px] bg-gradient-to-r from-transparent to-purple-800" />
+              <span className="font-['Cinzel'] text-amber-400 text-[10px] font-black italic select-none">VS</span>
+              <div className="w-10 h-[1px] bg-gradient-to-l from-transparent to-purple-800" />
+            </div>
           </div>
-        ) : (
-          <div className="flex-1 flex justify-center items-end relative h-[65px] select-none">
-            {playerHand.map((card, i) => {
-              const N = playerHand.length;
-              const angle = (i - (N - 1) / 2) * 10;
-              const translateY = Math.abs(i - (N - 1) / 2) * 5;
-              const translateX = (i - (N - 1) / 2) * 20;
-              const isSelected = selectedHandCard?.id === card.id;
 
-              return (
-                <div
-                  key={card.id + '-' + i}
-                  draggable
-                  onDragStart={(e) => {
-                    e.dataTransfer.setData("text/plain", card.id);
-                  }}
-                  onClick={() => setSelectedHandCard(isSelected ? null : card)}
-                  className="absolute bottom-0 cursor-pointer active:scale-95 transition-all origin-bottom"
-                  style={{
-                    transform: 'translateX(' + translateX + 'px) translateY(' + translateY + 'px) rotate(' + angle + 'deg) ' + (isSelected ? "scale(1.15) translateY(-8px)" : ""),
-                    zIndex: isSelected ? 40 : 10 + i,
-                    boxShadow: isSelected ? "0 0 12px rgba(139, 92, 246, 0.8)" : "none"
-                  }}
-                >
-                  <HandCard card={card} onPlay={() => {}} />
+          {/* PLAYER BOARD (Bottom Half) */}
+          <div className="w-full flex justify-center items-center gap-6 h-[125px] relative">
+            {/* Label indicating Player Side */}
+            <div className="absolute left-2 bottom-8 flex flex-col items-center opacity-60">
+              <span className="text-[6px] text-purple-400 font-bold uppercase tracking-widest leading-none">Your Mat</span>
+            </div>
+
+            {/* Column 1: Discard Stack */}
+            <div className="w-[50px] flex flex-col items-center justify-center">
+              <span className="text-[5px] text-slate-500 font-black mb-0.5">DISCARD ({playerDiscard.length})</span>
+              {playerDiscard.length > 0 ? (
+                <CardBack count={playerDiscard.length} label="Discard" color="slate" width={42} height={56} />
+              ) : (
+                <EmptySlot label="Discard" width={42} height={56} />
+              )}
+            </div>
+
+            {/* Column 2: Trophy Stack, Deck, Initial Effect */}
+            <div className="w-[120px] h-[115px] relative flex flex-col justify-between py-1.5 flex-shrink-0 select-none">
+              {/* Top Row: Trophy Stack & Deck */}
+              <div className="flex justify-between items-center w-full px-1">
+                <div className="relative">
+                  {playerTrophies.length > 0 ? (
+                    <div className="relative">
+                      <CardBack count={playerTrophies.length} label="Trophies" color="amber" width={40} height={52} />
+                      <div className="absolute -top-1 -left-1 bg-amber-500/20 p-0.5 rounded-full text-[6px] pointer-events-none">🏆</div>
+                    </div>
+                  ) : (
+                    <EmptySlot label="Trophies" width={40} height={52} />
+                  )}
                 </div>
-              );
-            })}
+
+                <div>
+                  {playerDeck.length > 0 ? (
+                    <CardBack count={playerDeck.length} label="Deck" color="purple" width={40} height={52} onClick={drawCardToHand} />
+                  ) : (
+                    <EmptySlot label="Deck Empty" width={40} height={52} />
+                  )}
+                </div>
+              </div>
+
+              {/* Bottom Row: Initial Effect */}
+              <div className="flex justify-center w-full">
+                {playerInitialValue ? (
+                  <div className="w-[40px] h-[52px] rounded-xl border border-rose-500/50 bg-rose-950/40 flex flex-col items-center justify-between p-0.5 text-center shadow-lg cursor-pointer" onClick={() => onZoomCard(playerInitialValue)}>
+                    <span className="text-[4px] font-black text-rose-300 uppercase tracking-wide leading-none">Initial</span>
+                    <span className="text-[5px] font-black text-white leading-none line-clamp-2">{playerInitialValue.name}</span>
+                    <span className="text-[5px] font-black text-rose-400">+{playerInitialValue.power}</span>
+                  </div>
+                ) : (
+                  <EmptySlot label="No Initial" width={40} height={52} />
+                )}
+              </div>
+            </div>
+
+            {/* Column 3: Clash/Active Area */}
+            <div 
+              id="player-active-slot"
+              className={`w-[180px] h-[105px] relative flex items-center justify-center border transition-all rounded-xl ${isDragOver ? "bg-purple-500/20 border-dashed border-purple-500 scale-[1.02]" : "border-purple-900/30 bg-purple-955/5"}`}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setIsDragOver(true);
+              }}
+              onDragLeave={() => setIsDragOver(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setIsDragOver(false);
+                const cardId = e.dataTransfer.getData("text/plain");
+                const card = playerHand.find(c => c.id === cardId);
+                if (card) playCardFromHand(card);
+              }}
+              onClick={() => {
+                if (selectedHandCard) {
+                  playCardFromHand(selectedHandCard);
+                  setSelectedHandCard(null);
+                }
+              }}
+            >
+              {/* Active Creature Slot */}
+              <div className="absolute left-3">
+                {playerActive ? (
+                  <div className="w-[50px] h-[68px] flex items-center justify-center relative select-none">
+                    <div className="absolute origin-center scale-[0.5]">
+                      <FullCard card={playerActive} dimmed={matchPhase === "resolved" && clashResult?.winner === "opponent"} onZoom={onZoomCard} />
+                    </div>
+                    {playerActive && (
+                      <span className="absolute -bottom-1 -right-1 bg-purple-955 border border-purple-500 text-white font-black text-[6.5px] px-1 rounded-sm shadow-md z-30">
+                        P: {playerActive.power + (equippedItem ? equippedItem.power : 0) + (playerEffects.length * 2) + (playerInitialValue ? playerInitialValue.power : 0)}
+                      </span>
+                    )}
+                    {floatPowerText && (
+                      <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[8px] font-black text-emerald-400 animate-bounce bg-black/75 px-1 py-0.5 rounded border border-emerald-500/30 shadow-lg z-40">
+                        {floatPowerText}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <EmptySlot label="Drop Here" width={50} height={68} />
+                )}
+              </div>
+
+              {/* Item Slot (Top-Right) */}
+              <div className="absolute right-3 top-1.5">
+                {equippedItem ? (
+                  <div className="w-[38px] h-[48px] flex items-center justify-center relative select-none">
+                    <div className="absolute origin-center scale-[0.4]">
+                      <FullCard card={equippedItem} onZoom={onZoomCard} />
+                    </div>
+                    <button 
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        setPlayerDiscard(prev => [...prev, equippedItem]); 
+                        setEquippedItem(null); 
+                      }} 
+                      className="absolute -top-1.5 -right-1.5 z-50 w-3.5 h-3.5 rounded-full bg-red-600 hover:bg-red-500 text-white font-bold text-[8px] flex items-center justify-center"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ) : (
+                  <EmptySlot label="Item" width={38} height={42} dashed />
+                )}
+              </div>
+
+              {/* Effect Slot (Bottom-Right) */}
+              <div className="absolute right-3 bottom-1.5">
+                {playerEffects.length > 0 ? (
+                  <div className="w-[38px] h-[48px] flex items-center justify-center relative select-none">
+                    <div className="absolute origin-center scale-[0.4]">
+                      <FullCard card={playerEffects[playerEffects.length - 1]} onZoom={onZoomCard} />
+                    </div>
+                  </div>
+                ) : (
+                  <EmptySlot label="Effect" width={38} height={42} dashed />
+                )}
+              </div>
+            </div>
           </div>
-        )}
+          
+          {/* Clashing controls row */}
+          {!autoplay && (matchPhase === "ready" || matchPhase === "resolved" || matchPhase === "tie_breaker") && (
+            <div className="absolute top-[148px] left-[15px] z-45">
+              <button
+                onClick={playClashTurn}
+                className="px-4 py-1.5 rounded-full font-['Nunito'] font-black text-[9px] uppercase tracking-wider bg-gradient-to-r from-amber-500 to-orange-500 text-amber-955 shadow-lg active:scale-95 hover:brightness-110 transition-all cursor-pointer border border-amber-400/30"
+              >
+                {matchPhase === "tie_breaker" ? "Execute Tie-Breaker!" : "Clash! Reveal"}
+              </button>
+            </div>
+          )}
+
+        </div>
+
+        {/* RIGHT AREA: Vertical Hand Dock */}
+        <div className="w-[125px] border-l border-purple-900/40 bg-[#080617]/95 px-2 py-2 flex flex-col justify-between h-full select-none z-30">
+          <div className="flex flex-col items-center select-none w-full border-b border-purple-900/30 pb-1.5">
+            <span className="text-[8px] text-purple-400 font-bold uppercase tracking-widest text-center">Your Hand ({playerHand.length}/5)</span>
+          </div>
+
+          <div className="flex-1 flex flex-col justify-start items-center relative w-full pt-4">
+            {playerHand.length === 0 ? (
+              <span className="text-[7.5px] text-purple-700 italic text-center mt-12 px-1 leading-normal">No cards. Touch Draw Deck on the left!</span>
+            ) : (
+              <div className="relative w-full h-[280px] flex flex-col items-center">
+                {playerHand.map((card, i) => {
+                  const isSelected = selectedHandCard?.id === card.id;
+                  const topOffset = i * 42; // Vertical stack offset
+                  return (
+                    <div
+                      key={card.id + '-' + i}
+                      draggable
+                      onDragStart={(e) => {
+                        e.dataTransfer.setData("text/plain", card.id);
+                      }}
+                      onClick={() => setSelectedHandCard(isSelected ? null : card)}
+                      className="absolute left-1/2 -translate-x-1/2 cursor-pointer active:scale-95 transition-all duration-200 origin-center"
+                      style={{
+                        top: topOffset + 'px',
+                        zIndex: isSelected ? 40 : 10 + i,
+                        transform: 'translateX(-50%) ' + (isSelected ? "translateX(-12px) scale(1.08)" : ""),
+                        boxShadow: isSelected ? "0 0 16px rgba(139, 92, 246, 0.9)" : "none",
+                        borderRadius: '12px'
+                      }}
+                    >
+                      <HandCard card={card} onPlay={() => {}} />
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <div className="text-[6px] text-purple-500/80 text-center leading-normal mt-2 border-t border-purple-900/30 pt-1.5 font-sans">
+            Drag items to Creature (or tap selection)
+          </div>
+        </div>
       </div>
 
       {/* Tutorial overlay wizard */}
