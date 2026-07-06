@@ -1884,7 +1884,7 @@ function GameMatScreen({ onNavigate, profile, setProfile, catalog, setMatchHisto
           
           {/* Clash Turn outcome text label */}
           {clashResult && (
-            <div className="absolute top-[152px] left-[130px] z-45 text-left bg-[#150f35]/95 border border-purple-800/40 rounded-lg px-2.5 py-1 max-w-[280px] shadow-2xl">
+            <div className="absolute top-[148px] left-1/2 -translate-x-1/2 z-45 text-center bg-[#150f35]/95 border border-purple-800/40 rounded-lg px-2.5 py-1 max-w-[280px] shadow-2xl">
               <span className={`text-[8.5px] font-['Nunito'] font-bold leading-tight ${clashResult.winner === "player" ? "text-emerald-400" : clashResult.winner === "opponent" ? "text-rose-400" : "text-amber-400"}`}>
                 {clashResult.reason}
               </span>
